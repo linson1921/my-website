@@ -305,7 +305,52 @@
             </li>
         </ul>
 
-        <h3>2. 如何运行</h3>
+        <h3>2. 采集方式与硬件连接详解</h3>
+        <p>为了获得最低的延迟和最佳的安全性，本程序支持多种画面采集方式。请根据你的硬件环境选择：</p>
+        <ul>
+            <li><strong>常规本机采集 (Duplication API)</strong>
+                <ul>
+                    <li><strong>原理</strong>：直接调用 Windows 的桌面复制接口，适合单机使用。</li>
+                    <li><strong>配置</strong>：<code>capture_method</code> 设置为 <code>duplication_api</code>。</li>
+                    <li><strong>优点</strong>：无需额外硬件，延迟极低，适配性最广。</li>
+                </ul>
+            </li>
+            <li><strong>UDP 异步采集（双机网络转发流派，已被TX检测）</strong>
+                <ul>
+                    <li><strong>原理</strong>：在“游戏机（发送端）”截取画面并压缩，通过局域网发送到“AI 机（接收端）”。AI 机只负责目标检测和控制</li>
+                    <li><strong>发送端设置</strong>：使用 FFmpeg 将桌面流推送至接收端 IP。示例命令：
+                        <code
+                            style="display: block; margin-top: 8px; padding: 10px; line-height: 1.4; word-break: break-all; color: #2d3748; background: rgba(0, 0, 0, 0.04);">ffmpeg -f gdigrab -framerate 60 -i desktop -vf scale=640:640 -vcodec mjpeg -q:v 5 -f mjpeg udp://接收端IP:1234</code>
+                    </li>
+                    <li><strong>你也可以使用OBS双机推流，去b站找教程即可</strong>
+                    <li><strong>接收端设置</strong>：
+                        <ul>
+                            <li>在菜单中将 <code>capture_method</code> 设置为 <code>udp_capture</code>。</li>
+                            <li>确保 IP 设置为 <code>0.0.0.0</code>（监听所有地址）或指定的发送端 IP。</li>
+                            <li>开放防火墙 UDP 端口（默认 1234）。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><strong>采集卡 物理隔离流派 <span class="highlight">最大程度规避反作弊对采集行为的检测</span>。</strong>
+                <ul>
+                    <li><strong>原理</strong>：通过 HDMI 采集卡将游戏机的画面传输到 AI 机，AI 机通过 OpenCV 直接读取视频采集设备。</li>
+                    <li><strong>硬件连接</strong>：<code>游戏机 HDMI 输出</code> ➔ <code>HDMI 一分二 (或带环出的采集卡)</code> ➔
+                        <code>采集卡 USB</code> ➔ <code>AI 机</code>。
+                    </li>
+                    <li><strong>软件配置</strong>：
+                        <ul>
+                            <li>在菜单中将 <code>capture_method</code> 设置为 <code>VideoCapture</code> (OpenCV)。</li>
+                            <li>在设备列表中找到你的采集卡名称并选中。</li>
+                            <li><strong>分辨率建议</strong>：通常设置为 <code>1920x1080</code> 或 <code>1280x720</code>，程序会自动在中心裁剪出
+                                AI 运算区域。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>3. 如何运行</h3>
         <ol>
             <li><strong>下载并解压</strong> 对应版本的压缩包。</li>
             <li>对于 <strong>CUDA 版本</strong>，请确保已安装 <a href="https://developer.nvidia.com/cuda-13-1-0-download-archive"
@@ -320,7 +365,7 @@
             <li><strong>开启菜单</strong>：在游戏内按 <strong>HOME</strong> 键打开/关闭设置界面（Overlay）。</li>
         </ol>
 
-        <h3>3. 控制快捷键</h3>
+        <h3>4. 控制快捷键</h3>
         <ul>
             <li><strong>鼠标右键</strong>：瞄准锁定的目标。</li>
             <li><strong>F2</strong>：退出程序。</li>
@@ -374,7 +419,7 @@
         </div>
 
         <h3>2. 速度倍率 (Speed Multiplier)</h3>
-        <p>限制了鼠标移动的极值，这个影响跟枪，按需调整。</p>
+        <p>限制了鼠标移动的极值，这个影响跟抢。</p>
         <ul>
             <li><strong>最小速度倍率 (Min Speed Multiplier)</strong>: 移动速度的下限乘数。</li>
             <li><strong>最大速度倍率 (Max Speed Multiplier)</strong>: 移动速度的上限乘数。</li>
