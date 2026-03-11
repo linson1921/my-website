@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>余晖 Aimbot 控制端使用与调参完全指南</title>
+    <style>
+        /* 基础重置 */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+            color: #2c3e50;
+            line-height: 1.7;
+            /* 接入樱花二次元随机壁纸 API，每次刷新自动更换 */
+            background: url('https://www.dmoe.cc/random.php') no-repeat center center fixed;
+            background-size: cover;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 核心：毛玻璃效果容器 */
+        .glass-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 50px;
+            /* 半透明白色背景 */
+            background: rgba(255, 255, 255, 0.85);
+            /* 磨砂玻璃模糊滤镜 */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            /* 微妙的边框和阴影增加立体感 */
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 响应式：手机端适配 */
+        @media (max-width: 768px) {
+            .glass-container {
+                margin: 20px;
+                padding: 25px;
+                border-radius: 12px;
+            }
+
+            .fov-result-box {
+                flex-direction: column;
+            }
+        }
+
+        /* 排版样式 */
+        h1,
+        h2,
+        h3 {
+            color: #1a202c;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 0.5em;
+        }
+
+        h2 {
+            font-size: 1.6em;
+            margin-top: 1.8em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            font-size: 1.3em;
+            margin-top: 1.5em;
+            color: #2b6cb0;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        a {
+            color: #3182ce;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #2c5282;
+            text-decoration: underline;
+        }
+
+        /* 高级引言样式 */
+        blockquote {
+            margin: 20px 0;
+            padding: 15px 20px;
+            background: rgba(235, 248, 255, 0.7);
+            border-left: 5px solid #4299e1;
+            border-radius: 0 8px 8px 0;
+            color: #2a4365;
+        }
+
+        blockquote p {
+            margin: 0;
+        }
+
+        /* 列表样式 */
+        ul,
+        ol {
+            padding-left: 25px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 行内代码块 */
+        code {
+            font-family: Consolas, "Courier New", monospace;
+            background: rgba(0, 0, 0, 0.06);
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: #e53e3e;
+            font-size: 0.9em;
+        }
+
+        /* 顶部 AI 提示框特殊美化 */
+        .alert-box {
+            background: linear-gradient(135deg, rgba(254, 235, 200, 0.9), rgba(251, 211, 141, 0.9));
+            border-left: 6px solid #dd6b20;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #7b341e;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 强调文字 */
+        strong {
+            color: #2d3748;
+        }
+
+        .highlight {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+
+        /* FOV 查询工具专项样式 */
+        .fov-tool {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            backdrop-filter: blur(5px);
+        }
+
+        .fov-tool-header {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2b6cb0;
+            font-size: 1.15em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fov-select-wrapper select {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #2d3748;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .fov-select-wrapper select:focus {
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+        }
+
+        .fov-result-box {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fov-result-box.active {
+            max-height: 200px;
+            /* 足够展示卡片的高度 */
+            opacity: 1;
+            transform: translateY(0);
+            overflow: visible;
+        }
+
+        .fov-card {
+            flex: 1;
+            background: rgba(235, 248, 255, 0.85);
+            border-left: 5px solid #4299e1;
+            padding: 16px 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .fov-card span {
+            font-size: 0.9em;
+            color: #4a5568;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .fov-card strong {
+            font-size: 1.4em;
+            color: #2a4365;
+            font-family: Consolas, "Courier New", monospace;
+            letter-spacing: 0.5px;
+        }
+
+        /* 友情链接区域样式 */
+        .fov-tool-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(0, 0, 0, 0.15);
+            font-size: 0.9em;
+            color: #718096;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .fov-external-link {
+            color: #4299e1;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(66, 153, 225, 0.2);
+        }
+
+        .fov-external-link:hover {
+            color: #2b6cb0;
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #3182ce;
+            box-shadow: 0 2px 6px rgba(49, 130, 206, 0.15);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glass-container">
+        <h1>🎯 余晖 Aimbot 控制端使用与调参完全指南</h1>
+
+        <div class="alert-box">
+            【调参很简单，理解本文，你也可以调出赋能、航天顶护的拉枪手感】
+        </div>
+
+        <h2>🚀 快速开始（使用指南）</h2>
+
+        <h3>1. 版本选择与硬件要求</h3>
+        <ul>
+            <li><strong>DirectML (DML) 版本 —— 通用型 (所有显卡)</strong>
+                <ul>
+                    <li><strong>适用人群</strong>：任何现代显卡（NVIDIA、AMD、Intel，包括集成显卡）。</li>
+                    <li><strong>优点</strong>：无需配置 CUDA 环境，解压即用，兼容性最强。</li>
+                    <li><strong>建议</strong>：GTX 10xx/9xx/7xx 系列（老款 NVIDIA）、AMD Radeon、Intel Iris/Xe 或轻薄本/办公用集成显卡用户首选。
+                    </li>
+                </ul>
+            </li>
+            <li><strong>CUDA + TensorRT 版本 —— 高性能型 (仅限 NVIDIA)</strong>
+                <ul>
+                    <li><strong>适用人群</strong>：NVIDIA <strong>GTX 1660, RTX 2000/3000/4000/5000</strong> 及更新系列。</li>
+                    <li><strong>要求</strong>：需要安装 <a href="https://developer.nvidia.com/cuda-13-1-0-download-archive"
+                            target="_blank">CUDA 13.1</a> 驱动支持（如果未安装，请先点击链接下载安装）。</li>
+                    <li><strong>优点</strong>：利用 TensorRT 加速，推理延迟更低，性能更强。支持在设置中切换 CUDA+TensorRT 或 DML 模式。</li>
+                    <li><strong>注意</strong>：GTX 10xx (Pascal) 及更早期的显卡因显卡硬件限制，不支持最新版的 TensorRT 加速。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>2. 如何运行</h3>
+        <ol>
+            <li><strong>下载并解压</strong> 对应版本的压缩包。</li>
+            <li>对于 <strong>CUDA 版本</strong>，请确保已安装 <a href="https://developer.nvidia.com/cuda-13-1-0-download-archive"
+                    target="_blank">CUDA 13.1</a>。</li>
+            <li>对于 <strong>DML 版本</strong>，无需额外软件设置。</li>
+            <li><strong>运行 <code>ai.exe</code></strong>。
+                <ul>
+                    <li><em>首次运行</em>：程序会自动导出模型优化，可能需要 1-5 分钟，请耐心等待。</li>
+                </ul>
+            </li>
+            <li><strong>放置模型</strong>：将你的 <code>.onnx</code> 模型文件放到目录下的 <code>models</code> 文件夹中。</li>
+            <li><strong>开启菜单</strong>：在游戏内按 <strong>HOME</strong> 键打开/关闭设置界面（Overlay）。</li>
+        </ol>
+
+        <h3>3. 控制快捷键</h3>
+        <ul>
+            <li><strong>鼠标右键</strong>：瞄准锁定的目标。</li>
+            <li><strong>F2</strong>：退出程序。</li>
+            <li><strong>F3</strong>：暂停/恢复瞄准。</li>
+            <li><strong>F4</strong>：重新加载配置文件。</li>
+            <li><strong>Home</strong>：开启/关闭菜单界面。</li>
+        </ul>
+
+        <h2>一、 参数全解析：每个参数都在做什么？</h2>
+
+        <h3>1. 视野 (FOV)</h3>
+        <p>决定了 AI 在屏幕上寻找和锁定目标的区域大小。</p>
+        <ul>
+            <li><strong>视角 X (FOV X)</strong>: 水平方向的搜索范围。</li>
+            <li><strong>视角 Y (FOV Y)</strong>: 垂直方向的搜索范围。</li>
+        </ul>
+        <blockquote>
+            <strong>💡 调参影响</strong>：<br>
+            - <strong>调大</strong>：AI 会尝试锁定距离准星更远的目标，但在人多的情况下容易频繁在不同目标之间切换（也就是乱锁）。<br>
+            - <strong>调小</strong>：AI 只会锁定准星附近极小范围内的目标，不易受干扰，但需要你手动将准星拉到非常接近目标的位置才会触发。<br>
+            每个游戏都有引擎自带的标准 FOV，可以使用下方的工具快速检索。
+        </blockquote>
+
+        <!-- 新增：FOV 快速查阅工具 -->
+        <div class="fov-tool">
+            <div class="fov-tool-header">🔍 常用游戏 FOV 快速查阅工具</div>
+            <div class="fov-select-wrapper">
+                <select id="fovSelect">
+                    <option value="" disabled selected>-- 请选择你的游戏和分辨率比例 --</option>
+                    <!-- 选项由 JS 自动生成 -->
+                </select>
+            </div>
+            <div class="fov-result-box" id="fovResult">
+                <div class="fov-card">
+                    <span>FOV X (水平视角)</span>
+                    <strong id="val-hfov">-</strong>
+                </div>
+                <div class="fov-card">
+                    <span>FOV Y (垂直视角)</span>
+                    <strong id="val-vfov">-</strong>
+                </div>
+            </div>
+
+            <!-- 新增：友情链接扩展栏 -->
+            <div class="fov-tool-footer">
+                没找到你的游戏？👉 友情链接：
+                <a href="https://www.mouse-sensitivity.com/" target="_blank" class="fov-external-link">
+                    Mouse Sensitivity Converter and Calculator | Same Aim - Different Game ↗
+                </a>
+            </div>
+        </div>
+
+        <h3>2. 速度倍率 (Speed Multiplier)</h3>
+        <p>限制了鼠标移动的极值，这个影响跟枪，按需调整。</p>
+        <ul>
+            <li><strong>最小速度倍率 (Min Speed Multiplier)</strong>: 移动速度的下限乘数。</li>
+            <li><strong>最大速度倍率 (Max Speed Multiplier)</strong>: 移动速度的上限乘数。</li>
+        </ul>
+        <blockquote>
+            <strong>💡 调参影响</strong>：<br>
+            - 影响着整个光标由远及近飞向目标时的“绝对限速范围”。<br>
+            - 如果你觉得总体拉枪偏慢，可以适当<strong>调大最大速度倍率</strong>。<br>
+            - 如果远近距离拉枪都太快像非人类，需要<strong>调小最大速度倍率</strong>。
+        </blockquote>
+
+        <h3>3. 轨迹预测 (Prediction)</h3>
+        <p>专为移动靶（跑动的敌人）设计，通过当前位置与上一帧位置的变化，预判其接下来的动向。</p>
+        <ul>
+            <li><strong>预测间隔 (Prediction Interval)</strong>: 预测的时间间隔参数（> 0 生效）。可以理解为预判未来的时间/距离跨度。</li>
+            <li><strong>预测位置数 (Future Positions)</strong>: 取历史多少帧位置数据来进行运动轨迹推演。</li>
+        </ul>
+        <blockquote>
+            <strong>💡 调参影响</strong>：<br>
+            - <strong>调大间隔</strong>：准星会瞄向目标运动前方的更远距离（提前量变大），适合子弹飞行速度慢或目标移动极快的游戏。<br>
+            - <strong>调小/禁用</strong>：准星仅仅锁定目标当前的真实位置。打静止靶极准，但打高移速移动靶时准星总会跟在目标后方吃尾气。
+        </blockquote>
+
+        <h3>4. 目标修正 (Target Correction) ⭐ 核心手感区</h3>
+        <p>这一块主要决定“当准星由远到近贴近目标时，速度如何平滑过渡以及如何锁死”。</p>
+        <ul>
+            <li><strong>吸附半径 (Snap Radius)</strong>：距离准星极近时的“强行吸附”范围。在这个范围里，光标几乎不减速或提供极强的最终一击锁敌。</li>
+            <li><strong>近距半径 (Near Radius)</strong>：光标进入该半径时，开启减速机制的区域。通常远大于吸附半径。</li>
+            <li><strong>速度曲线指数 (Speed Curve Exponent)</strong>：控制光标进入近距半径后的“减速曲线”。
+                <ul>
+                    <li><strong>数值 &lt; 1.0 (例如 0.5)</strong>：减速非常缓慢，光标在靠近目标时速度依然较快并且线性减弱。</li>
+                    <li><strong>数值 = 1.0</strong>：标准的线性匀减速。</li>
+                    <li><strong>数值 &gt; 1.0 (例如 2.0~3.0)</strong>：指数级急减速，靠近目标时突然变慢，显得很平滑但可能导致最终锁定略有迟缓。</li>
+                </ul>
+            </li>
+            <li><strong>吸附加速倍数 (Snap Boost Factor)</strong>：一旦进入“吸附半径 (Snap)”范围，提供一段最后的速度爆发，防止光标因为上面的减速曲线而卡在目标周围进不去中心。
+            </li>
+            <li><strong>EMA 平滑 (Velocity/Move EMA Alpha)</strong>：处理由于画面采集带来的高频抖动。
+                <ul>
+                    <li>数值 <code>0.1</code>：极度平滑，但响应有明显拖影/延迟。</li>
+                    <li>数值 <code>1.0</code>：无平滑，响应极快但可能肉眼可见的光标发抖（抽搐）。</li>
+                </ul>
+            </li>
+            <li><strong>PID 增强 (Ki & Kd 比例)</strong>：
+                <ul>
+                    <li><strong>Ki (积分)</strong>：用于解决“稳态误差”。比如你发现平滑开得高，准星永远追不上移动目标，差了几个像素。调大 Ki 能够让 AI
+                        意识到“我已经落后很久了，我要加速补回这一段”。</li>
+                    <li><strong>Kd (微分)</strong>：用于防止“超调”。阻尼刹车作用。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>5. 游戏配置 (Game Profile) ⭐ 必须第一步设置对！</h3>
+        <p>AI 必须知道游戏内的物理引擎映射，才能计算该把鼠标移动多少，这是基石。</p>
+        <ul>
+            <li><strong>当前配置 (Profile) & 游戏内鼠标灵敏度/偏航角/俯仰角</strong>：这些<span
+                    class="highlight">影响整体的拉枪速度，可以简单理解为PID的p值</span>。
+                <ul>
+                    <li><strong>灵敏度 (Sens)</strong>：这是决定拉枪速度的核心参数。在余晖代码逻辑下，<span
+                            class="highlight">数值越低，瞄准拉枪越快；数值越高，瞄准拉枪越慢</span>。请根据跟枪速度的需求按需调整。最优先是调整这个值</li>
+                    <li><strong>偏航角 (m_yaw)</strong> & <strong>俯仰角 (m_pitch)</strong>：必须与游戏内设置（通常为
+                        <code>0.022</code>）保持绝对一致，以确保计算准确。
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <blockquote>
+            <strong>💣 如果填错了会怎样？</strong><br>
+            AI 会发现：我明明移动了这么多，为什么准星没到？接着 AI 又会再次猛拉，表现为光标疯狂鬼畜摇摆，或者是拉不到位/甩过头。正常情况就是拉枪到目标且不抖动，就说明灵敏度设置正确。
+        </blockquote>
+
+        <h3>6. 辅助控制 (WindMouse / 其他输入方式)</h3>
+        <ul>
+            <li><strong>WindMouse 鼠标移动</strong>：一种模拟真实手部物理手抖轨迹的移动算法。不仅走直线，还会沿着类似抛物线或风力波动的曲线移动到目标，极大增强人性化防检测。
+                <ul>
+                    <li><strong>重力 (Gravity)</strong> 与 <strong>风力 (Wind)</strong> 决定了轨迹的随机偏移强度，建议保持默认微调即可。</li>
+                </ul>
+            </li>
+            <li><strong>鼠标输入方式</strong>：决定你向电脑发送鼠标坐标的驱动层级。推荐 GHUB / KMBOX (网盘版或A版) / MAKCU 等硬件/驱动层模拟器，WIN32方式非常容易被反作弊检测。
+            </li>
+        </ul>
+
+        <h2>二、 科学调参 6 步法：如何从零调出完美手感？</h2>
+
+        <blockquote>
+            💡 <strong>调参心法则</strong>：<strong>每次只调一个参数</strong>，并在靶场测试感受它的变化。千万不要一次性乱改五个参数，一旦手感变差你根本不知道是谁引起的问题。
+        </blockquote>
+
+        <h3>📌 步骤 1：对齐物理基准（最重要的一步！）</h3>
+        <ol>
+            <li>进入【游戏配置】栏目。</li>
+            <li><strong>设置游戏灵敏度 (Sens)</strong>：重点理解——<span class="highlight">调低数值 = 加快拉枪速度，调高数值 =
+                    减慢拉枪速度</span>。根据实际游戏内的拉枪手感微调。</li>
+            <li>确保你的 <code>m_yaw</code> 数值与游戏引擎底层（大多数是 0.022）一致。</li>
+        </ol>
+
+        <h3>📌 步骤 2：设定舒适的瞄准视野</h3>
+        <p>在界面中输入你刚才在上方工具中查阅到的对应游戏的 FOV 数值。</p>
+
+        <h3>📌 步骤 3：基础跟枪手感打磨（暂闭平滑与增强）</h3>
+        <ol>
+            <li>暂且将【EMA 平滑】下的 <strong>速度平滑</strong> 和 <strong>移动平滑</strong> 设为 <code>1.0</code> (完全无平滑)。</li>
+            <li>先把【PID增强】<strong>取消勾选 / 关闭</strong>。</li>
+            <li>先把【轨迹预测】的预测间隔调为 <code>0</code> (关闭)。</li>
+            <li>调整 <strong>最小/最大速度倍率</strong>。在靶场看着静止目标按住锁定键。【一般情况0.1就行】
+                <ul>
+                    <li>目标：确保拉枪的速度符合预期，<strong>不慢得像蜗牛，也不快得像瞬移</strong>。</li>
+                </ul>
+            </li>
+            <li>测试并调整【速度曲线指数】和【近距半径】。
+                <ul>
+                    <li>如果拉枪太突兀不自然，把曲线指数调到 <code>1.5 - 2.5</code> 之间，让靠近时有减速感。</li>
+                    <li>如果最后阶段总是进不去目标中心，稍微调大【吸附加速倍数】(例如调到 <code>1.5</code>) 和【吸附半径】(例如 <code>2.0</code>)。</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>📌 步骤 4：消除机械感与抖动（启用平滑）</h3>
+        <ol>
+            <li>开始调小【速度平滑系数】和【移动平滑系数】，从 <code>1.0</code> 慢慢往下试（如 <code>0.8</code> -> <code>0.6</code> ->
+                <code>0.4</code>）。
+            </li>
+            <li>每降一点，感受一下光标移动是否变得丝滑。</li>
+            <li><strong>寻找临界点</strong>：当你发现虽然丝滑，但感觉“拖泥带水，总是比目标慢半拍”时，说明平滑系数太低了。稳妥的数值通常在 <code>0.4 - 0.7</code> 之间。</li>
+        </ol>
+
+        <h3>📌 步骤 5：攻克移动靶难题（预测与 PID）</h3>
+        <ol>
+            <li><strong>应对延迟</strong>：如果你的画面因为采集计算延迟，总落后于敌人的真实位置，稍微开启一点【预测间隔】（例如 <code>0.02 - 0.05</code>
+                秒），让准星提前去预测目标前方的身位。</li>
+            <li><strong>解决稳态误差（总是跟在屁股后面偏一个身位）</strong>：勾选【启用 PID 增强】。
+                <ul>
+                    <li>逐渐增加 <strong>积分 Ki 比例</strong>（例如调到 <code>0.05</code> ->
+                        <code>0.1</code>）。你会发现原本平滑带来的滞后感消失了，准星会“加速用力”追上一段填平这段差距。
+                    </li>
+                    <li>如果 Ki 太大导致准星像钟摆一样在目标身上左右摇晃甩过头，就微微增加 <strong>微分 Kd 比例</strong> (例如 <code>0.001 - 0.005</code>)
+                        来给鼠标踩一脚刹车，专门抑制这种摇晃。</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>📌 步骤 6：伪装得更像人类（WindMouse 曲线）</h3>
+        <ol>
+            <li>勾选 <strong>启用 WindMouse</strong>。</li>
+            <li>保持默认的【重力 18】和【风力 15】数值测试即可。这会让每次锁定的轨迹路线产生轻微的波纹或弧度转移，躲避反作弊的各种直线向量行为分析。</li>
+        </ol>
+
+        <h2>🎉 常见疑难解答 (Troubleshooting)</h2>
+        <ul>
+            <li><strong>Q: 准星疯狂左摇右晃、抽搐停不下来？</strong><br>
+                A: 绝对是【游戏配置】里的灵敏度(Sens) 分辨率 或 m_yaw 设置和游戏里对应不上，导致程序计算所需位移量算错，反复横跳超调。</li>
+            <li><strong>Q: 远距离拉枪很准，但进了近战范围锁定总是差最后一点贴不上？</strong><br>
+                A: 调高【目标修正】里的【吸附加速倍数 (Snap Boost)】，或者调低【速度曲线指数 (Speed Curve)】。也可能是平滑系数开得太低太拖沓了。</li>
+            <li><strong>Q: 打移动靶时，准星始终在它身后一点点？</strong><br>
+                A: 开启【PID 增强】，适度加一点 <strong>Ki (积分)</strong> 系数；或者稍微增加【预测间隔】给点提前量。</li>
+        </ul>
+
+    </div>
+
+    <!-- 注入 FOV 数据及交互逻辑 -->
+    <script>
+        // 将 FOV.txt 转换为结构化数据
+        const fovData = [
+            { name: "CFHD (16:9)", hfov: "95", vfov: "63.088285" },
+            { name: "CFHD (4:3)", hfov: "95", vfov: "78.599373" },
+            { name: "CF (16:10)", hfov: "77.160869", vfov: "53" },
+            { name: "CF (16:9)", hfov: "83.105462", vfov: "53" },
+            { name: "CF (4:3)", hfov: "67.229971", vfov: "53" },
+            { name: "CSGO (16:9)", hfov: "106.260205", vfov: "73.739795" },
+            { name: "CSGO (4:3)", hfov: "90", vfov: "73.739795" },
+            { name: "生死狙击1 (16:9)", hfov: "90", vfov: "58.715507" },
+            { name: "生死狙击1 (4:3)", hfov: "90", vfov: "73.739795" },
+            { name: "生死狙击2", hfov: "106", vfov: "73.479935" },
+            { name: "VALORANT (瓦罗兰特/无畏契约) (16:9)", hfov: "103", vfov: "70.5328" },
+            { name: "VALORANT (瓦罗兰特/无畏契约) (4:3)", hfov: "86.631971", vfov: "70.5328" },
+            { name: "卡拉比丘 (16:9)", hfov: "85", vfov: "54.536442" },
+            { name: "卡拉比丘 (4:3)", hfov: "68.997464", vfov: "54.536442" },
+            { name: "Warface (战争前线) (16:9)", hfov: "91.492845", vfov: "60" },
+            { name: "Warface (战争前线) (4:3)", hfov: "75.178179", vfov: "60" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectEl = document.getElementById('fovSelect');
+            const resultBox = document.getElementById('fovResult');
+            const hfovText = document.getElementById('val-hfov');
+            const vfovText = document.getElementById('val-vfov');
+
+            // 动态生成下拉选项
+            fovData.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = item.name;
+                selectEl.appendChild(option);
+            });
+
+            // 监听用户选择变化
+            selectEl.addEventListener('change', (e) => {
+                const selectedIndex = e.target.value;
+                if (selectedIndex !== "") {
+                    const data = fovData[selectedIndex];
+                    // 更新数值
+                    hfovText.textContent = data.hfov;
+                    vfovText.textContent = data.vfov;
+                    // 显示动画结果框
+                    resultBox.classList.add('active');
+                } else {
+                    resultBox.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
