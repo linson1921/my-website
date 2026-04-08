@@ -1559,7 +1559,931 @@
         */
 
     </script>
-    <script src="tutorial-sandbox.js"></script>
+    <script>
+(function () {
+    const canvas = document.getElementById('simCanvas');
+    if (!canvas || !canvas.getContext) {
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    const sandboxContainer = canvas.closest('.sandbox-container');
+    const sandboxControls = sandboxContainer.querySelector('.sandbox-controls');
+    const sandboxIntro = sandboxContainer.querySelector('p');
+    const sandboxLegend = sandboxContainer.querySelector('.sandbox-legend');
+    const footerNote = sandboxControls.querySelector('p');
+
+    const simCurve = document.getElementById('simCurve');
+    const simPert = document.getElementById('simPert');
+    const simLead = document.getElementById('simSpeed');
+    const simBtn = document.getElementById('simBtn');
+
+    const curveGroup = simCurve.closest('.sandbox-control-group');
+    const pertGroup = simPert.closest('.sandbox-control-group');
+    const leadGroup = simLead.closest('.sandbox-control-group');
+
+    sandboxIntro.classList.add('sandbox-intro');
+    sandboxIntro.innerHTML = '这个沙盒按当前 <code>mouse.cpp</code> 的控制链拆成 <strong>预测层</strong>、<strong>速度过渡层</strong>、<strong>宿主轨迹层</strong> 和 <strong>微扰层</strong>。画布里把固定屏幕中心等效成一枚可视化准星，方便你直接看清每一层是怎么叠起来的。';
+
+    const chipRow = document.createElement('div');
+    chipRow.className = 'sandbox-chip-row';
+    chipRow.innerHTML = [
+        '<span class="sandbox-chip">Prediction = Dynamic Alpha-Beta + acceleration</span>',
+        '<span class="sandbox-chip">Speed = target/current multiplier</span>',
+        '<span class="sandbox-chip">Host = Bezier / Linear</span>',
+        '<span class="sandbox-chip">Perturb = 守恒侧向微扰 + 尾段归零</span>'
+    ].join('');
+    sandboxIntro.insertAdjacentElement('afterend', chipRow);
+
+    sandboxLegend.textContent = '🔴 观测点 · 🔵 预测点 · 青色虚线 = 宿主轨迹 · 绿色 = 最终输出 · 白色 = 可视化准星';
+
+    curveGroup.querySelector('label').innerHTML = '速度曲线指数 (Speed Curve) <strong id="val-curve" style="color:#2b6cb0;">1.50</strong>';
+    pertGroup.querySelector('label').innerHTML = '微扰强度 (Perturbation) <strong id="val-pert" style="color:#2b6cb0;">0.30</strong>';
+    leadGroup.querySelector('label').innerHTML = '预测前置 (Prediction Lead) <strong id="val-speed" style="color:#2b6cb0;">20 ms</strong>';
+    simLead.min = '0';
+    simLead.max = '80';
+    simLead.step = '1';
+    simLead.value = '20';
+
+    function makeSelectGroup(labelText, selectId, options, defaultValue) {
+        const group = document.createElement('div');
+        group.className = 'sandbox-control-group';
+        const label = document.createElement('label');
+        label.textContent = labelText;
+        const select = document.createElement('select');
+        select.id = selectId;
+        options.forEach((option) => {
+            const node = document.createElement('option');
+            node.value = option.value;
+            node.textContent = option.label;
+            node.selected = option.value === defaultValue;
+            select.appendChild(node);
+        });
+        group.append(label, select);
+        return group;
+    }
+
+    function makeRangeGroup(labelText, inputId, valueId, attrs) {
+        const group = document.createElement('div');
+        group.className = 'sandbox-control-group';
+        const label = document.createElement('label');
+        label.innerHTML = `${labelText} <strong id="${valueId}" style="color:#2b6cb0;">${attrs.displayValue}</strong>`;
+        const input = document.createElement('input');
+        input.type = 'range';
+        input.id = inputId;
+        input.min = attrs.min;
+        input.max = attrs.max;
+        input.step = attrs.step;
+        input.value = attrs.value;
+        group.append(label, input);
+        return group;
+    }
+
+    function makeStatCard(label, valueId, metaId, valueText, metaText) {
+        const card = document.createElement('div');
+        card.className = 'sandbox-stat-card';
+        card.innerHTML = `
+            <span class="sandbox-stat-label">${label}</span>
+            <strong class="sandbox-stat-value" id="${valueId}">${valueText}</strong>
+            <span class="sandbox-stat-meta" id="${metaId}">${metaText}</span>
+        `;
+        return card;
+    }
+
+    const controlsGrid = document.createElement('div');
+    controlsGrid.className = 'sandbox-controls-grid';
+    sandboxControls.insertBefore(controlsGrid, simBtn);
+
+    const modeGroup = makeSelectGroup('轨迹模式 (Host Mode)', 'simMode', [
+        { value: 'bezierPerturb', label: 'Bezier + Perturb' },
+        { value: 'bezierOnly', label: 'Bezier Only' },
+        { value: 'linearPerturb', label: 'Linear Host + Perturb' },
+        { value: 'legacyLinear', label: 'Legacy Linear' }
+    ], 'bezierPerturb');
+
+    const presetGroup = makeSelectGroup('轨迹预设 (Preset)', 'simPreset', [
+        { value: 'default', label: 'Default / Balanced' },
+        { value: 'stable', label: 'Stable' },
+        { value: 'aggressive', label: 'Aggressive' }
+    ], 'default');
+
+    const alphaGroup = makeRangeGroup(
+        '速度平滑偏置 (Tracking Alpha)',
+        'simAlpha',
+        'val-alpha',
+        { min: '0.35', max: '1.00', step: '0.01', value: '0.80', displayValue: '0.80' }
+    );
+
+    const bezierGroup = makeRangeGroup(
+        'Bezier 强度 (Bezier Strength)',
+        'simBezier',
+        'val-bezier',
+        { min: '0.00', max: '1.00', step: '0.01', value: '0.35', displayValue: '0.35' }
+    );
+
+    controlsGrid.append(
+        modeGroup,
+        presetGroup,
+        leadGroup,
+        alphaGroup,
+        curveGroup,
+        bezierGroup,
+        pertGroup
+    );
+
+    const statsGrid = document.createElement('div');
+    statsGrid.className = 'sandbox-mini-stats';
+    statsGrid.append(
+        makeStatCard('Prediction', 'simStatePrediction', 'simStatePredictionMeta', 'Filter only', '等待第一帧'),
+        makeStatCard('Speed', 'simStateSpeed', 'simStateSpeedMeta', '0.00 -> 0.00', 'target / current multiplier'),
+        makeStatCard('Host', 'simStateHost', 'simStateHostMeta', 'Legacy linear', '等待规划'),
+        makeStatCard('Perturb', 'simStatePerturb', 'simStatePerturbMeta', 'Bypass', '等待规划'),
+        makeStatCard('Reset Guard', 'simStateReset', 'simStateResetMeta', 'None', 'retarget / residual / reversal')
+    );
+    sandboxControls.insertBefore(statsGrid, simBtn);
+
+    const configNote = document.createElement('p');
+    configNote.className = 'sandbox-config-note';
+    configNote.innerHTML = '说明：这里把 <code>Sens / m_yaw / FOV</code> 到 counts 的换算归一化成了演示尺度，所以绝对速度不是你的实机值；但 <code>predictionInterval</code>、<code>speedCurveExponent</code>、Bezier 分段、微扰守恒与 bypass 条件都按当前源码结构建模。';
+    sandboxControls.insertBefore(configNote, footerNote);
+
+    footerNote.className = 'sandbox-footer-note';
+    footerNote.textContent = '提示：点击黑色画布可改准星起点；按钮会强制模拟一次 reacquire，让你看到“首帧线性重启”和“微扰被旁路”是怎么发生的。';
+    simBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>重新抽样 / 强制重获取';
+
+    const simMode = document.getElementById('simMode');
+    const simPreset = document.getElementById('simPreset');
+    const simAlpha = document.getElementById('simAlpha');
+    const simBezier = document.getElementById('simBezier');
+
+    const valCurve = document.getElementById('val-curve');
+    const valPert = document.getElementById('val-pert');
+    const valLead = document.getElementById('val-speed');
+    const valAlpha = document.getElementById('val-alpha');
+    const valBezier = document.getElementById('val-bezier');
+
+    const statePrediction = document.getElementById('simStatePrediction');
+    const statePredictionMeta = document.getElementById('simStatePredictionMeta');
+    const stateSpeed = document.getElementById('simStateSpeed');
+    const stateSpeedMeta = document.getElementById('simStateSpeedMeta');
+    const stateHost = document.getElementById('simStateHost');
+    const stateHostMeta = document.getElementById('simStateHostMeta');
+    const statePerturb = document.getElementById('simStatePerturb');
+    const statePerturbMeta = document.getElementById('simStatePerturbMeta');
+    const stateReset = document.getElementById('simStateReset');
+    const stateResetMeta = document.getElementById('simStateResetMeta');
+
+    const TWO_PI = Math.PI * 2;
+    const K_PERTURB_NOISE_FLOOR = 0.5;
+
+    const DEMO_CONFIG = {
+        queueLimit: 6,
+        maxDistance: 320,
+        minSpeedMultiplier: 0.22,
+        maxSpeedMultiplier: 0.82,
+        nearRadius: 110,
+        snapRadius: 18,
+        snapBoostFactor: 1.55,
+        controlScale: 0.20,
+        targetMaxSpeed: 560,
+        targetAccel: 1850,
+        targetGoalHoldSec: 2.2,
+        inferenceDelayBaseMs: 24,
+        inferenceDelaySwingMs: 8,
+        measurementNoisePx: 1.1
+    };
+
+    const PRESETS = {
+        default: { accelEmaAlpha: 0.30, bezierStepLen: 6.0, bezierMaxSteps: 3, bezierMaxOffset: 4.0, cadenceJitter: 0.04, settleRatio: 0.06, settleExtra: 0.9, settleTrigger: 16.0, reacquireScale: 0.55, minCurveLen: 3.0, strongCorrection: 8.0, resetStopSpeed: 60.0, resetReverseSpeed: 140.0, resetResidualAbs: 14.0, resetResidualRatio: 0.28, queueReserve: 2 },
+        stable: { accelEmaAlpha: 0.20, bezierStepLen: 8.0, bezierMaxSteps: 2, bezierMaxOffset: 2.5, cadenceJitter: 0.03, settleRatio: 0.04, settleExtra: 0.6, settleTrigger: 12.0, reacquireScale: 0.45, minCurveLen: 4.0, strongCorrection: 10.0, resetStopSpeed: 70.0, resetReverseSpeed: 180.0, resetResidualAbs: 18.0, resetResidualRatio: 0.33, queueReserve: 2 },
+        aggressive: { accelEmaAlpha: 0.40, bezierStepLen: 5.0, bezierMaxSteps: 4, bezierMaxOffset: 6.0, cadenceJitter: 0.06, settleRatio: 0.08, settleExtra: 1.2, settleTrigger: 18.0, reacquireScale: 0.65, minCurveLen: 2.0, strongCorrection: 6.0, resetStopSpeed: 50.0, resetReverseSpeed: 120.0, resetResidualAbs: 10.0, resetResidualRatio: 0.22, queueReserve: 2 }
+    };
+
+    function clamp(value, minValue, maxValue) {
+        return Math.min(maxValue, Math.max(minValue, value));
+    }
+
+    function clamp01(value) {
+        return clamp(value, 0, 1);
+    }
+
+    function lerp(start, end, t) {
+        return start + (end - start) * clamp01(t);
+    }
+
+    function sanitizeDt(dtSec, minValue = 1e-4, maxValue = 0.1) {
+        if (!Number.isFinite(dtSec) || dtSec <= 0) {
+            return 1 / 60;
+        }
+        return clamp(dtSec, minValue, maxValue);
+    }
+
+    function clampPoint(point) {
+        return {
+            x: clamp(point.x, 12, canvas.width - 12),
+            y: clamp(point.y, 12, canvas.height - 12)
+        };
+    }
+
+    function pushTrailPoint(trail, x, y, nowSec, maxLength) {
+        const p = clampPoint({ x, y });
+        trail.push({ x: p.x, y: p.y, t: nowSec });
+        while (trail.length > maxLength) {
+            trail.shift();
+        }
+    }
+
+    function trimTrail(trail, nowSec, lifeSec) {
+        while (trail.length && (nowSec - trail[0].t) > lifeSec) {
+            trail.shift();
+        }
+    }
+
+    function getPreset() {
+        return PRESETS[simPreset.value] || PRESETS.default;
+    }
+
+    function getModeFlags() {
+        switch (simMode.value) {
+            case 'bezierOnly': return { bezier: true, perturb: false };
+            case 'linearPerturb': return { bezier: false, perturb: true };
+            case 'legacyLinear': return { bezier: false, perturb: false };
+            default: return { bezier: true, perturb: true };
+        }
+    }
+
+    function setControlLabels() {
+        valLead.textContent = `${parseFloat(simLead.value).toFixed(0)} ms`;
+        valAlpha.textContent = parseFloat(simAlpha.value).toFixed(2);
+        valCurve.textContent = parseFloat(simCurve.value).toFixed(2);
+        valBezier.textContent = parseFloat(simBezier.value).toFixed(2);
+        valPert.textContent = parseFloat(simPert.value).toFixed(2);
+    }
+
+    const target = { x: 450, y: 150, vx: 0, vy: 0, goalX: 450, goalY: 150, goalTimer: 0, phase: Math.random() * TWO_PI };
+    let crosshair = { x: 60, y: 260 };
+    let trackCounter = 17;
+
+    function makeRuntime() {
+        return {
+            filter: { initialized: false, x: 0, y: 0, vx: 0, vy: 0 },
+            accel: { ax: 0, ay: 0, prevVx: 0, prevVy: 0 },
+            speed: { initialized: false, value: 0 },
+            bezier: { trackId: -1, curveSide: 1, linearRestartFrames: 0 },
+            measurement: { x: null, y: null },
+            observed: { x: target.x, y: target.y },
+            predicted: { x: target.x, y: target.y },
+            hostTrail: [],
+            finalTrail: [],
+            hostPath: [],
+            finalPath: [],
+            leadSec: 0,
+            targetSpeed: 0,
+            currentSpeed: 0,
+            hostSummary: '等待规划',
+            hostMeta: '尚未输出',
+            perturbSummary: 'Bypass',
+            perturbMeta: '等待规划',
+            predictionSummary: 'Filter only',
+            predictionMeta: '等待第一帧',
+            resetSummary: 'None',
+            resetMeta: 'retarget / residual / reversal'
+        };
+    }
+
+    let runtime = makeRuntime();
+
+    function triggerRetarget() {
+        trackCounter += 1;
+        runtime.stableFrames = 0;
+        runtime.bezier.linearRestartFrames = 1;
+        runtime.resetSummary = 'retarget';
+        runtime.resetMeta = '按钮触发重获取';
+    }
+
+    function chooseNewGoal() {
+        target.goalX = clamp(260 + Math.random() * 280, 60, canvas.width - 60);
+        target.goalY = clamp(55 + Math.random() * 260, 55, canvas.height - 55);
+        target.goalTimer = 0;
+        target.phase = Math.random() * TWO_PI;
+    }
+
+    function hardReset(startX, startY) {
+        crosshair = clampPoint({ x: startX, y: startY });
+        target.x = 410 + Math.random() * 120;
+        target.y = 70 + Math.random() * 220;
+        target.vx = 0;
+        target.vy = 0;
+        target.goalTimer = 0;
+        runtime = makeRuntime();
+        triggerRetarget();
+        runtime.observed = { x: target.x, y: target.y };
+        runtime.predicted = { x: target.x, y: target.y };
+        chooseNewGoal();
+    }
+
+    function updateTargetMotion(dtSec) {
+        target.goalTimer += dtSec;
+        const dx = target.goalX - target.x;
+        const dy = target.goalY - target.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 26 || target.goalTimer > DEMO_CONFIG.targetGoalHoldSec) {
+            chooseNewGoal();
+        }
+
+        const desiredDist = Math.hypot(target.goalX - target.x, target.goalY - target.y);
+        const desiredSpeed = Math.min(
+            DEMO_CONFIG.targetMaxSpeed,
+            Math.sqrt(Math.max(0, 2 * DEMO_CONFIG.targetAccel * desiredDist))
+        );
+        const dirX = desiredDist > 1e-6 ? (target.goalX - target.x) / desiredDist : 0;
+        const dirY = desiredDist > 1e-6 ? (target.goalY - target.y) / desiredDist : 0;
+        const desiredVx = dirX * desiredSpeed;
+        const desiredVy = dirY * desiredSpeed;
+        const maxDelta = DEMO_CONFIG.targetAccel * dtSec;
+        target.vx += clamp(desiredVx - target.vx, -maxDelta, maxDelta);
+        target.vy += clamp(desiredVy - target.vy, -maxDelta, maxDelta);
+        target.x = clamp(target.x + target.vx * dtSec, 35, canvas.width - 35);
+        target.y = clamp(target.y + target.vy * dtSec, 35, canvas.height - 35);
+    }
+
+    function getObservedPoint(nowSec) {
+        const scale = DEMO_CONFIG.measurementNoisePx;
+        return {
+            x: target.x + Math.sin(nowSec * 6.8 + trackCounter * 0.17) * scale * 0.75,
+            y: target.y + Math.cos(nowSec * 5.3 + trackCounter * 0.11) * scale * 0.58
+        };
+    }
+
+    function getInferenceDelayMs(nowSec) {
+        const speed = Math.hypot(target.vx, target.vy);
+        const motionBias = clamp((speed - 180) / 550, 0, 1);
+        return clamp(
+            DEMO_CONFIG.inferenceDelayBaseMs +
+            Math.sin(nowSec * 1.15 + target.phase) * DEMO_CONFIG.inferenceDelaySwingMs +
+            motionBias * 8,
+            12,
+            52
+        );
+    }
+
+    function calculateSpeedMultiplier(distance) {
+        const minSpeed = DEMO_CONFIG.minSpeedMultiplier;
+        const maxSpeed = DEMO_CONFIG.maxSpeedMultiplier;
+        const curveExp = parseFloat(simCurve.value);
+        if (distance < DEMO_CONFIG.snapRadius) {
+            return minSpeed * DEMO_CONFIG.snapBoostFactor;
+        }
+        if (distance < DEMO_CONFIG.nearRadius) {
+            const t = distance / DEMO_CONFIG.nearRadius;
+            const curve = 1 - Math.pow(1 - t, curveExp);
+            return minSpeed + (maxSpeed - minSpeed) * curve;
+        }
+        const norm = clamp(distance / DEMO_CONFIG.maxDistance, 0, 1);
+        return minSpeed + (maxSpeed - minSpeed) * norm;
+    }
+
+    function updateSpeedController(targetSpeed, dtSec) {
+        const range = Math.max(1e-4, DEMO_CONFIG.maxSpeedMultiplier - DEMO_CONFIG.minSpeedMultiplier);
+        const accelPerSec = range / 0.10;
+        const decelPerSec = range / 0.16;
+        if (!runtime.speed.initialized || !Number.isFinite(runtime.speed.value)) {
+            runtime.speed.initialized = true;
+            runtime.speed.value = targetSpeed;
+            return runtime.speed.value;
+        }
+        const delta = targetSpeed - runtime.speed.value;
+        const rate = delta >= 0 ? accelPerSec : decelPerSec;
+        const maxStep = rate * dtSec;
+        if (Math.abs(delta) <= maxStep || maxStep <= 0) {
+            runtime.speed.value = targetSpeed;
+        } else {
+            runtime.speed.value += Math.sign(delta) * maxStep;
+        }
+        return runtime.speed.value;
+    }
+
+    function updatePrediction(dtSec, observed, measuredSpeed, nowSec) {
+        const preset = getPreset();
+        const alphaBias = parseFloat(simAlpha.value);
+        const leadSec = parseFloat(simLead.value) / 1000 + getInferenceDelayMs(nowSec) / 1000;
+        runtime.leadSec = leadSec;
+
+        const prevVx = runtime.filter.vx;
+        const prevVy = runtime.filter.vy;
+        const distancePx = Math.hypot(observed.x - crosshair.x, observed.y - crosshair.y);
+        const predictedStateX = runtime.filter.initialized ? runtime.filter.x + runtime.filter.vx * dtSec : observed.x;
+        const predictedStateY = runtime.filter.initialized ? runtime.filter.y + runtime.filter.vy * dtSec : observed.y;
+        const residualX = observed.x - predictedStateX;
+        const residualY = observed.y - predictedStateY;
+        const residualPx = Math.hypot(residualX, residualY);
+
+        runtime.stableFrames = (runtime.stableFrames || 0) + 1;
+        const distanceT = clamp(distancePx / 450, 0, 1);
+        const speedT = clamp(measuredSpeed / 1400, 0, 1);
+        const residualT = clamp(residualPx / 200, 0, 1);
+        const lockT = clamp(runtime.stableFrames / 6, 0, 1);
+        const approachT = Math.max(distanceT, 0.7 * speedT, 0.8 * residualT);
+        const settleT = clamp(lockT * (1 - 0.6 * residualT) * (1 - 0.5 * speedT), 0, 1);
+
+        let alphaMin = lerp(0.35, 0.60, alphaBias);
+        let alphaMax = lerp(0.55, 0.90, alphaBias);
+        let betaMin = 0.015;
+        let betaMax = 0.050;
+        if (simPreset.value === 'stable') {
+            alphaMax = Math.min(alphaMax, 0.65);
+            betaMax = 0.030;
+        } else if (simPreset.value === 'aggressive') {
+            alphaMin = Math.max(alphaMin, 0.65);
+            betaMin = 0.030;
+        }
+
+        const effectiveAlpha = lerp(alphaMin, alphaMax, approachT * (1 - 0.55 * settleT));
+        const effectiveBeta = lerp(betaMin, betaMax, approachT * (1 - 0.80 * settleT));
+
+        if (!runtime.filter.initialized) {
+            runtime.filter.initialized = true;
+            runtime.filter.x = observed.x;
+            runtime.filter.y = observed.y;
+            runtime.filter.vx = 0;
+            runtime.filter.vy = 0;
+        } else {
+            runtime.filter.x = predictedStateX + effectiveAlpha * residualX;
+            runtime.filter.y = predictedStateY + effectiveAlpha * residualY;
+            runtime.filter.vx += (effectiveBeta / Math.max(dtSec, 1e-3)) * residualX;
+            runtime.filter.vy += (effectiveBeta / Math.max(dtSec, 1e-3)) * residualY;
+        }
+
+        const accelAlpha = preset.accelEmaAlpha;
+        const rawAccelX = (runtime.filter.vx - runtime.accel.prevVx) / Math.max(dtSec, 1e-4);
+        const rawAccelY = (runtime.filter.vy - runtime.accel.prevVy) / Math.max(dtSec, 1e-4);
+        runtime.accel.ax = lerp(runtime.accel.ax, rawAccelX, accelAlpha);
+        runtime.accel.ay = lerp(runtime.accel.ay, rawAccelY, accelAlpha);
+        runtime.accel.prevVx = runtime.filter.vx;
+        runtime.accel.prevVy = runtime.filter.vy;
+
+        const currentSpeed = Math.hypot(runtime.filter.vx, runtime.filter.vy);
+        const reversed = (prevVx * runtime.filter.vx + prevVy * runtime.filter.vy) < 0 && currentSpeed > preset.resetReverseSpeed;
+        const stopped = Math.hypot(prevVx, prevVy) >= preset.resetStopSpeed && currentSpeed < preset.resetStopSpeed;
+        const residualSpike = residualPx > Math.max(preset.resetResidualAbs, preset.resetResidualRatio * Math.max(distancePx, 0));
+        if (reversed || stopped || residualSpike) {
+            runtime.filter.x = observed.x;
+            runtime.filter.y = observed.y;
+            runtime.filter.vx = 0;
+            runtime.filter.vy = 0;
+            runtime.accel.ax = 0;
+            runtime.accel.ay = 0;
+            runtime.accel.prevVx = 0;
+            runtime.accel.prevVy = 0;
+            runtime.stableFrames = 0;
+            runtime.bezier.linearRestartFrames = 1;
+            runtime.resetSummary = residualSpike ? 'residual spike' : (reversed ? 'reversed' : 'stopped');
+            runtime.resetMeta = reversed || stopped || residualSpike ? 'zero-lag guard 触发线性重启' : runtime.resetMeta;
+        } else {
+            runtime.resetSummary = 'None';
+            runtime.resetMeta = 'retarget / residual / reversal';
+        }
+
+        runtime.predictionSummary = parseFloat(simLead.value) <= 0 ? 'Filter only' : 'Lead active';
+        runtime.predictionMeta = `lead ${(leadSec * 1000).toFixed(1)} ms | residual ${residualPx.toFixed(1)} px`;
+        return {
+            x: runtime.filter.x + runtime.filter.vx * leadSec + 0.5 * runtime.accel.ax * leadSec * leadSec,
+            y: runtime.filter.y + runtime.filter.vy * leadSec + 0.5 * runtime.accel.ay * leadSec * leadSec
+        };
+    }
+
+    function cubicBezier(p0, p1, p2, p3, t) {
+        const u = 1 - t;
+        return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3;
+    }
+
+    function smootherstep(t) {
+        const c = clamp01(t);
+        return c * c * c * (c * (c * 6 - 15) + 10);
+    }
+
+    function buildProgress(stepCount, jitterRatio) {
+        const weights = [];
+        for (let i = 0; i < stepCount; i += 1) {
+            const start = i / stepCount;
+            const end = (i + 1) / stepCount;
+            weights.push(smootherstep(end) - smootherstep(start));
+        }
+        const phase = (trackCounter % 97) * 0.6180339887;
+        for (let i = 0; i < weights.length; i += 1) {
+            const factor = clamp(1 + jitterRatio * Math.sin((i + 1) * 1.7320508075 + phase), 0.70, 1.30);
+            weights[i] *= factor;
+        }
+        const sum = weights.reduce((acc, value) => acc + value, 0) || 1;
+        let cumulative = 0;
+        return weights.map((value, index) => {
+            cumulative += value / sum;
+            return index + 1 === weights.length ? 1 : clamp01(cumulative);
+        });
+    }
+
+    function planBezierSteps(totalX, totalY) {
+        const preset = getPreset();
+        const strength = parseFloat(simBezier.value);
+        const len = Math.hypot(totalX, totalY);
+        const safeSlots = Math.max(1, DEMO_CONFIG.queueLimit - preset.queueReserve);
+        const stepLen = Math.max(1, lerp(preset.bezierStepLen, preset.bezierStepLen * 0.65, strength));
+        const plannedSteps = len <= 1e-8 ? 1 : clamp(Math.ceil(len / stepLen), 2, preset.bezierMaxSteps);
+        const effectiveSteps = Math.min(plannedSteps, safeSlots);
+        const reacquireFirstFrame = runtime.bezier.linearRestartFrames > 0;
+
+        if (reacquireFirstFrame) {
+            runtime.bezier.linearRestartFrames = Math.max(0, runtime.bezier.linearRestartFrames - 1);
+            runtime.hostSummary = 'Bezier bypass';
+            runtime.hostMeta = 'reacquire 首帧走线性重启';
+            return { steps: [[totalX * preset.reacquireScale, totalY * preset.reacquireScale]], effectiveSteps: 1 };
+        }
+
+        if (len < preset.minCurveLen || effectiveSteps <= 1) {
+            runtime.hostSummary = 'Bezier bypass';
+            runtime.hostMeta = len < preset.minCurveLen ? '位移太短，不值得做弯曲' : '队列预算不足';
+            return { steps: [[totalX, totalY]], effectiveSteps: 1 };
+        }
+
+        const dirX = totalX / len;
+        const dirY = totalY / len;
+        const perpX = -dirY;
+        const perpY = dirX;
+        const offset = Math.min(preset.bezierMaxOffset, strength * len);
+        const progress = buildProgress(effectiveSteps, preset.cadenceJitter);
+        const steps = [];
+        let previous = [0, 0];
+
+        const useSettleTail = effectiveSteps >= 3 && len <= preset.settleTrigger;
+        const settleExtra = useSettleTail ? Math.min(preset.settleExtra, len * preset.settleRatio) : 0;
+        const bezierTargetX = totalX + dirX * settleExtra;
+        const bezierTargetY = totalY + dirY * settleExtra;
+        const p1x = dirX * (0.22 * Math.hypot(bezierTargetX, bezierTargetY)) + perpX * offset;
+        const p1y = dirY * (0.22 * Math.hypot(bezierTargetX, bezierTargetY)) + perpY * offset;
+        const p2x = dirX * (0.72 * Math.hypot(bezierTargetX, bezierTargetY)) + perpX * (0.55 * offset);
+        const p2y = dirY * (0.72 * Math.hypot(bezierTargetX, bezierTargetY)) + perpY * (0.55 * offset);
+
+        progress.forEach((t) => {
+            const current = [
+                cubicBezier(0, p1x, p2x, bezierTargetX, t),
+                cubicBezier(0, p1y, p2y, bezierTargetY, t)
+            ];
+            steps.push([current[0] - previous[0], current[1] - previous[1]]);
+            previous = current;
+        });
+
+        if (settleExtra > 1e-8) {
+            steps[steps.length - 1][0] += totalX - bezierTargetX;
+            steps[steps.length - 1][1] += totalY - bezierTargetY;
+            runtime.hostMeta = 'Bezier + settle tail';
+        } else {
+            runtime.hostMeta = 'Bezier 宿主生效';
+        }
+        runtime.hostSummary = `Bezier ${plannedSteps}/${effectiveSteps}`;
+        return { steps, effectiveSteps };
+    }
+
+    function buildLinearSteps(totalX, totalY) {
+        const preset = getPreset();
+        const safeSlots = Math.max(1, DEMO_CONFIG.queueLimit - preset.queueReserve);
+        const len = Math.hypot(totalX, totalY);
+        const plannedSteps = len <= 1e-8 ? 1 : Math.max(1, Math.ceil(len / preset.bezierStepLen));
+        const effectiveSteps = Math.min(plannedSteps, safeSlots);
+        if (effectiveSteps <= 1) {
+            return { steps: [[totalX, totalY]], effectiveSteps: 1 };
+        }
+        const steps = [];
+        let emittedX = 0;
+        let emittedY = 0;
+        const baseX = totalX / effectiveSteps;
+        const baseY = totalY / effectiveSteps;
+        for (let i = 0; i + 1 < effectiveSteps; i += 1) {
+            steps.push([baseX, baseY]);
+            emittedX += baseX;
+            emittedY += baseY;
+        }
+        steps.push([totalX - emittedX, totalY - emittedY]);
+        return { steps, effectiveSteps };
+    }
+
+    function applyPerturbation(hostSteps) {
+        if (!getModeFlags().perturb) {
+            runtime.perturbSummary = 'Off';
+            runtime.perturbMeta = '当前模式未启用 Wind 层';
+            return hostSteps.map((step) => [step[0], step[1]]);
+        }
+
+        if (hostSteps.length < 3) {
+            runtime.perturbSummary = 'Bypass';
+            runtime.perturbMeta = '宿主步数不足';
+            return hostSteps.map((step) => [step[0], step[1]]);
+        }
+
+        const strength = parseFloat(simPert.value);
+        if (strength <= 0) {
+            runtime.perturbSummary = 'Bypass';
+            runtime.perturbMeta = '强度为 0';
+            return hostSteps.map((step) => [step[0], step[1]]);
+        }
+
+        const tailZeroSteps = 2;
+        const coeffs = [];
+        const normals = [];
+        const perturbed = hostSteps.map((step) => [step[0], step[1]]);
+        for (let i = 0; i < hostSteps.length; i += 1) {
+            const len = Math.hypot(hostSteps[i][0], hostSteps[i][1]);
+            normals.push(len <= 1e-8 ? { x: 0, y: 0 } : { x: -hostSteps[i][1] / len, y: hostSteps[i][0] / len });
+            const tailFade = i >= hostSteps.length - tailZeroSteps ? (hostSteps.length - 1 - i) / tailZeroSteps : 1;
+            coeffs.push(((i + trackCounter) % 2 === 0 ? 1 : -1) * Math.max(0, tailFade));
+        }
+
+        let sumX = 0;
+        let sumY = 0;
+        for (let i = 0; i < coeffs.length; i += 1) {
+            sumX += normals[i].x * coeffs[i];
+            sumY += normals[i].y * coeffs[i];
+        }
+
+        const anchors = [0, 1];
+        const a = normals[anchors[0]];
+        const b = normals[anchors[1]];
+        const det = a.x * b.y - a.y * b.x;
+        if (Math.abs(det) > 1e-8) {
+            const adjustA = (-sumX * b.y + sumY * b.x) / det;
+            const adjustB = (sumX * a.y - sumY * a.x) / det;
+            coeffs[anchors[0]] += adjustA;
+            coeffs[anchors[1]] += adjustB;
+        }
+
+        let amplitude = Number.POSITIVE_INFINITY;
+        let maxAbs = 0;
+        coeffs.forEach((value) => {
+            maxAbs = Math.max(maxAbs, Math.abs(value));
+        });
+        if (maxAbs <= 1e-8) {
+            runtime.perturbSummary = 'Bypass';
+            runtime.perturbMeta = '法线退化';
+            return perturbed;
+        }
+
+        for (let i = 0; i < coeffs.length; i += 1) {
+            const stepLen = Math.hypot(hostSteps[i][0], hostSteps[i][1]);
+            const limit = strength * Math.min(0.75, 0.25 * stepLen);
+            if (limit <= 1e-8) {
+                continue;
+            }
+            amplitude = Math.min(amplitude, limit / Math.max(1e-8, Math.abs(coeffs[i] / maxAbs)));
+        }
+
+        if (!Number.isFinite(amplitude) || amplitude < K_PERTURB_NOISE_FLOOR) {
+            runtime.perturbSummary = 'Bypass';
+            runtime.perturbMeta = '小到会被量化吃掉';
+            return perturbed;
+        }
+
+        for (let i = 0; i < coeffs.length; i += 1) {
+            const scalar = amplitude * (coeffs[i] / maxAbs);
+            perturbed[i][0] += normals[i].x * scalar;
+            perturbed[i][1] += normals[i].y * scalar;
+        }
+
+        runtime.perturbSummary = 'Active';
+        runtime.perturbMeta = '扰动附着在宿主法线方向，并在尾段收敛到 0';
+        return perturbed;
+    }
+
+    function drawSegmentTrail(points, color, alphaScale, lineWidth, dashPattern, nowSec, lifetimeSec) {
+        if (points.length < 2) {
+            return;
+        }
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = lineWidth;
+        ctx.setLineDash(dashPattern || []);
+        for (let i = 1; i < points.length; i += 1) {
+            const age = nowSec - points[i].t;
+            const alpha = clamp01(1 - age / lifetimeSec) * alphaScale;
+            if (alpha <= 0) {
+                continue;
+            }
+            ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+            ctx.beginPath();
+            ctx.moveTo(points[i - 1].x, points[i - 1].y);
+            ctx.lineTo(points[i].x, points[i].y);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function drawPolyline(path, strokeStyle, lineWidth, dashPattern) {
+        if (path.length < 2) {
+            return;
+        }
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+        for (let i = 1; i < path.length; i += 1) {
+            ctx.lineTo(path[i].x, path[i].y);
+        }
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.setLineDash(dashPattern || []);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawCircle(x, y, radius, fillStyle, strokeStyle, lineWidth = 1) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, TWO_PI);
+        if (fillStyle) {
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        }
+        if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+        }
+    }
+
+    function drawCrosshair(x, y) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(x - 10, y);
+        ctx.lineTo(x - 3, y);
+        ctx.moveTo(x + 3, y);
+        ctx.lineTo(x + 10, y);
+        ctx.moveTo(x, y - 10);
+        ctx.lineTo(x, y - 3);
+        ctx.moveTo(x, y + 3);
+        ctx.lineTo(x, y + 10);
+        ctx.stroke();
+        drawCircle(x, y, 4.2, 'rgba(255,255,255,0.96)', 'rgba(74,222,128,0.92)', 2);
+        ctx.restore();
+    }
+
+    function stepSimulation(dtSec, nowSec) {
+        updateTargetMotion(dtSec);
+        const observed = getObservedPoint(nowSec);
+        const prevX = runtime.measurement.x;
+        const prevY = runtime.measurement.y;
+        const measuredSpeed = prevX == null || prevY == null ? 0 : Math.hypot(observed.x - prevX, observed.y - prevY) / dtSec;
+        runtime.measurement.x = observed.x;
+        runtime.measurement.y = observed.y;
+
+        const predicted = updatePrediction(dtSec, observed, measuredSpeed, nowSec);
+        runtime.observed = observed;
+        runtime.predicted = predicted;
+
+        const errorX = predicted.x - crosshair.x;
+        const errorY = predicted.y - crosshair.y;
+        const dist = Math.hypot(errorX, errorY);
+        const targetSpeed = calculateSpeedMultiplier(dist);
+        const currentSpeed = updateSpeedController(targetSpeed, dtSec);
+        runtime.targetSpeed = targetSpeed;
+        runtime.currentSpeed = currentSpeed;
+
+        const moveScale = DEMO_CONFIG.controlScale * (dtSec * 60);
+        const moveX = errorX * currentSpeed * moveScale;
+        const moveY = errorY * currentSpeed * moveScale;
+
+        const mode = getModeFlags();
+        const hostPlan = mode.bezier ? planBezierSteps(moveX, moveY) : buildLinearSteps(moveX, moveY);
+        if (!mode.bezier) {
+            runtime.hostSummary = mode.perturb ? `Linear ${hostPlan.steps.length}/${hostPlan.effectiveSteps}` : 'Legacy linear';
+            runtime.hostMeta = mode.perturb ? 'Bezier 关闭，仅保留线性宿主' : '无分段、无微扰';
+        }
+
+        const finalSteps = applyPerturbation(hostPlan.steps);
+        const hostPath = [clampPoint(crosshair)];
+        const finalPath = [clampPoint(crosshair)];
+
+        let ghost = { x: crosshair.x, y: crosshair.y };
+        hostPlan.steps.forEach((step) => {
+            ghost = clampPoint({ x: ghost.x + step[0], y: ghost.y + step[1] });
+            hostPath.push(ghost);
+            pushTrailPoint(runtime.hostTrail, ghost.x, ghost.y, nowSec, 260);
+        });
+
+        finalSteps.forEach((step) => {
+            crosshair = clampPoint({ x: crosshair.x + step[0], y: crosshair.y + step[1] });
+            finalPath.push(crosshair);
+            pushTrailPoint(runtime.finalTrail, crosshair.x, crosshair.y, nowSec, 260);
+        });
+
+        runtime.hostPath = hostPath;
+        runtime.finalPath = finalPath;
+        trimTrail(runtime.hostTrail, nowSec, 1.8);
+        trimTrail(runtime.finalTrail, nowSec, 2.4);
+    }
+
+    function render(nowSec) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawCircle(crosshair.x, crosshair.y, DEMO_CONFIG.nearRadius, null, 'rgba(148,163,184,0.18)', 1);
+        ctx.save();
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.arc(crosshair.x, crosshair.y, DEMO_CONFIG.snapRadius, 0, TWO_PI);
+        ctx.strokeStyle = 'rgba(245,158,11,0.42)';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+        ctx.restore();
+
+        drawSegmentTrail(runtime.hostTrail, [56, 189, 248], 0.32, 1.6, [5, 4], nowSec, 1.8);
+        drawSegmentTrail(runtime.finalTrail, [74, 222, 128], 0.55, 2.4, [], nowSec, 2.4);
+        drawPolyline(runtime.hostPath, 'rgba(56,189,248,0.90)', 1.6, [6, 4]);
+        drawPolyline(runtime.finalPath, 'rgba(74,222,128,0.96)', 2.6);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(runtime.observed.x, runtime.observed.y);
+        ctx.lineTo(runtime.predicted.x, runtime.predicted.y);
+        ctx.strokeStyle = parseFloat(simLead.value) > 0 ? 'rgba(96,165,250,0.55)' : 'rgba(148,163,184,0.32)';
+        ctx.lineWidth = 1.4;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.restore();
+
+        drawCircle(target.goalX, target.goalY, 6, null, 'rgba(248,250,252,0.25)', 1.2);
+        drawCircle(runtime.observed.x, runtime.observed.y, 7.5, 'rgba(239,68,68,0.95)', 'rgba(248,113,113,0.55)', 2);
+        drawCircle(runtime.predicted.x, runtime.predicted.y, 6.2, 'rgba(59,130,246,0.95)', 'rgba(125,211,252,0.55)', 2);
+        drawCrosshair(crosshair.x, crosshair.y);
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(226,232,240,0.78)';
+        ctx.font = '12px "Microsoft YaHei", sans-serif';
+        ctx.fillText(`Preset: ${simPreset.value}`, 16, canvas.height - 22);
+        ctx.fillText(`Mode: ${simMode.value}`, 16, canvas.height - 8);
+        ctx.restore();
+    }
+
+    function syncCards() {
+        statePrediction.textContent = runtime.predictionSummary;
+        statePredictionMeta.textContent = runtime.predictionMeta;
+        stateSpeed.textContent = `${runtime.targetSpeed.toFixed(2)} -> ${runtime.currentSpeed.toFixed(2)}`;
+        stateSpeedMeta.textContent = `snap ${DEMO_CONFIG.snapRadius}px / near ${DEMO_CONFIG.nearRadius}px`;
+        stateHost.textContent = runtime.hostSummary;
+        stateHostMeta.textContent = runtime.hostMeta;
+        statePerturb.textContent = runtime.perturbSummary;
+        statePerturbMeta.textContent = runtime.perturbMeta;
+        stateReset.textContent = runtime.resetSummary;
+        stateResetMeta.textContent = runtime.resetMeta;
+    }
+
+    [simLead, simAlpha, simCurve, simBezier, simPert].forEach((element) => {
+        element.addEventListener('input', setControlLabels);
+    });
+
+    [simMode, simPreset].forEach((element) => {
+        element.addEventListener('change', () => {
+            runtime.hostTrail = [];
+            runtime.finalTrail = [];
+            runtime.hostPath = [];
+            runtime.finalPath = [];
+        });
+    });
+
+    simBtn.addEventListener('click', () => {
+        const rx = 24 + Math.random() * 170;
+        const ry = 40 + Math.random() * 250;
+        hardReset(rx, ry);
+    });
+
+    canvas.addEventListener('mousedown', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
+        hardReset(x, y);
+    });
+
+    let lastTimestamp = 0;
+    function loop(timestamp) {
+        if (!lastTimestamp) {
+            lastTimestamp = timestamp;
+        }
+        const dtSec = sanitizeDt((timestamp - lastTimestamp) / 1000);
+        lastTimestamp = timestamp;
+        const nowSec = timestamp / 1000;
+        stepSimulation(dtSec, nowSec);
+        syncCards();
+        render(nowSec);
+        requestAnimationFrame(loop);
+    }
+
+    setControlLabels();
+    hardReset(60, 260);
+    requestAnimationFrame(loop);
+}());
+
+    </script>
 </body>
 
 </html>
