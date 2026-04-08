@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>余晖 Aimbot 控制端使用与调参完全指南</title>
+    <title>Sunset Aimbot 控制端使用与调参完全指南</title>
     <style>
         /* 基础重置 */
         * {
@@ -270,19 +270,560 @@
             box-shadow: 0 2px 6px rgba(49, 130, 206, 0.15);
             transform: translateY(-1px);
         }
+
+        /* -------------------------- */
+        /* 更新日志 (Changelog) 样式 */
+        /* -------------------------- */
+        .timeline-container {
+            position: relative;
+            margin: 40px 0;
+            padding-left: 30px;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 11px;
+            width: 3px;
+            background: linear-gradient(to bottom, rgba(66, 153, 225, 0.6) 0%, rgba(66, 153, 225, 0.1) 100%);
+            border-radius: 3px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -30.5px;
+            top: 6px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3.5px solid #3182ce;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover .timeline-dot {
+            background: #3182ce;
+            box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .timeline-item.important .timeline-dot {
+            border-color: #dd6b20;
+            box-shadow: 0 0 0 3px rgba(221, 107, 32, 0.15);
+        }
+        .timeline-item.important:hover .timeline-dot {
+            background: #dd6b20;
+            box-shadow: 0 0 0 4px rgba(221, 107, 32, 0.3);
+        }
+
+        .timeline-content {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, background 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .timeline-item:hover .timeline-content {
+            transform: translateX(6px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(66, 153, 225, 0.2);
+        }
+        
+        .timeline-item.important:hover .timeline-content {
+            border-color: rgba(221, 107, 32, 0.2);
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px dashed rgba(0,0,0,0.06);
+            padding-bottom: 6px;
+        }
+
+        .timeline-version {
+            font-size: 1.15em;
+            font-weight: 800;
+            color: #2c5282;
+            font-family: Consolas, "Courier New", monospace;
+            background: rgba(49, 130, 206, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        
+        .timeline-item.important .timeline-version {
+            color: #c05621;
+            background: rgba(221, 107, 32, 0.1);
+        }
+
+        .timeline-title {
+            font-size: 1.05em;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .timeline-badge {
+            font-size: 0.75em;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid #bee3f8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .timeline-badge.hot {
+            background: linear-gradient(135deg, #fffaf0, #feebc8);
+            color: #c05621;
+            border-color: #fbd38d;
+        }
+
+        .timeline-body {
+            font-size: 0.95em;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
+        .timeline-body ul {
+            margin-bottom: 0;
+            padding-left: 20px;
+            list-style-type: none; /* Custom bullets */
+        }
+        .timeline-body li {
+            margin-bottom: 6px;
+            position: relative;
+        }
+        .timeline-body li::before {
+            content: "•";
+            color: #4299e1;
+            font-weight: bold;
+            font-size: 1.2em;
+            position: absolute;
+            left: -15px;
+            top: -2px;
+        }
+        .timeline-item.important .timeline-body li::before {
+            color: #dd6b20;
+        }
+
+        /* -------------------------- */
+        /* 标签页切换动画与样式 */
+        /* -------------------------- */
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 25px 0 35px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 16px;
+            border: 1px solid rgba(49, 130, 206, 0.15);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.02), 0 4px 15px rgba(0, 0, 0, 0.02);
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 32px;
+            border: none;
+            background: transparent;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #4a5568;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            color: #2b6cb0;
+            background: rgba(255, 255, 255, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            box-shadow: 0 4px 15px rgba(49, 130, 206, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn svg {
+            margin-top: -2px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .tab-btn.active svg {
+            opacity: 1;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeInTab 0.4s ease-out forwards;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeInTab {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* -------------------------- */
+        /* 调参沙盒 (Sandbox) 样式 */
+        /* -------------------------- */
+        .sandbox-container {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 25px 0 40px 0;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sandbox-header {
+            margin: 0;
+            color: #2b6cb0;
+            font-size: 1.2em;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid rgba(49, 130, 206, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .sandbox-body {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-start; /* 防止左侧画布被右侧长菜单无限拉伸 */
+        }
+
+        /* 旧版 Canvas 冗余样式已清理，统一走新版赛博雷达视效 */
+
+        .sandbox-controls {
+            flex: 1;
+            min-width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: rgba(235, 248, 255, 0.6);
+            padding: 20px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+
+        .sandbox-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sandbox-control-group label {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sandbox-control-group input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #3182ce;
+        }
+
+        .sandbox-btn {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sandbox-btn:hover {
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .sandbox-legend {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.8em;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .sandbox-intro {
+            margin: 0;
+            font-size: 0.95em;
+            color: #4a5568;
+            line-height: 1.7;
+        }
+
+        .sandbox-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: -4px;
+        }
+
+        .sandbox-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(235, 248, 255, 0.88);
+            color: #2c5282;
+            border: 1px solid rgba(66, 153, 225, 0.18);
+            font-size: 0.82em;
+            font-weight: 600;
+        }
+
+        .sandbox-controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        .sandbox-control-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(49, 130, 206, 0.25);
+            background: rgba(255, 255, 255, 0.92);
+            color: #1f2937;
+            font-family: inherit;
+            font-size: 0.95em;
+        }
+
+        .sandbox-mini-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .sandbox-stat-card {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+        }
+
+        .sandbox-stat-label {
+            font-size: 0.75em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        .sandbox-stat-value {
+            font-size: 1.02em;
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .sandbox-stat-meta {
+            font-size: 0.78em;
+            color: #475569;
+            line-height: 1.45;
+        }
+
+        .sandbox-config-note,
+        .sandbox-footer-note {
+            margin: 0;
+            font-size: 0.82em;
+            line-height: 1.55;
+        }
+
+        .sandbox-config-note {
+            color: #35516d;
+        }
+
+        .sandbox-footer-note {
+            color: #5b6472;
+        }
+
+        .sandbox-controls {
+            gap: 16px;
+            padding: 18px 16px;
+            min-width: 280px;
+            background: rgba(235, 248, 255, 0.68);
+        }
+
+        /* 高级 Three.js 赛博雷达视效重构 */
+        .sandbox-canvas-wrapper {
+            flex: 1.5;
+            min-width: 320px;
+            position: sticky;        /* 粘性布局：跟随长菜单滚动 */
+            top: 20px;
+            aspect-ratio: 1 / 1;     /* 确立一个方正比例的完美视口 */
+            overflow: hidden;
+            border-radius: 14px;
+            background: radial-gradient(circle at 50% 50%, #152238 0%, #080d17 100%);
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.6), 
+                        0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid rgba(100, 150, 255, 0.08);
+
+            /* 居中自适应子元素防止留白 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 第一层：微光网格背景 */
+        .sandbox-canvas-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(66, 153, 225, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(66, 153, 225, 0.07) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center;
+            /* 边缘羽化遮罩 */
+            mask-image: radial-gradient(circle at 50% 50%, white 20%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at 50% 50%, white 20%, transparent 80%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 第二层：中心准星雷达环 */
+        .sandbox-canvas-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px dashed rgba(66, 153, 225, 0.15);
+            box-shadow: inset 0 0 30px rgba(66, 153, 225, 0.05);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        canvas#simCanvas {
+            width: 100%;
+            height: 100%;
+            max-height: 550px;       /* 防止过分拉伸 */
+            object-fit: contain;     /* 保持比例撑满容器 */
+            display: block;
+            position: relative;
+            z-index: 10;             /* 保证处于发光背景上层 */
+        }
+
+        .sandbox-legend {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            max-width: calc(100% - 30px);
+            padding: 8px 14px;
+            border-radius: 8px;
+            line-height: 1.5;
+            background: rgba(15, 23, 42, 0.75);
+            color: #94a3b8;
+            border: 1px solid rgba(66, 153, 225, 0.15);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            font-size: 0.8em;
+            pointer-events: none;
+            z-index: 20;
+            letter-spacing: 0.02em;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="glass-container">
-        <h1>🎯 余晖 Aimbot 控制端使用与调参完全指南</h1>
+        <h1>🎯 Sunset Aimbot 控制端完全指南</h1>
 
-        <div class="alert-box">
-            【调参很简单，理解本文，你也可以调出赋能、航天顶护的拉枪手感】
+        <!-- 顶部标签切换导航 -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-target="tab-tutorial">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                控制端教程
+            </button>
+            <button class="tab-btn" data-target="tab-playground">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                趣味沙盒
+            </button>
+            <button class="tab-btn" data-target="tab-changelog">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                更新日志
+            </button>
         </div>
 
-        <h2>🚀 快速开始（使用指南）</h2>
+        <!-- =========== 教程面板 =========== -->
+        <div id="tab-tutorial" class="tab-pane active">
+
+            <div class="alert-box">
+                【调参很简单，理解本文，你也可以调出赋能、航天顶护的拉枪手感】
+            </div>
+
+            <h2>🚀 快速开始（使用指南）</h2>
 
         <h3>1. 版本选择与硬件要求</h3>
         <ul>
@@ -359,6 +900,7 @@
             <li><strong>运行 <code>ai.exe</code></strong>。
                 <ul>
                     <li><em>首次运行</em>：程序会自动导出模型优化，可能需要 1-5 分钟，请耐心等待。</li>
+                    <li><em>防呆保护机制</em>：如果系统缺失必要环境文件（如 <code>cpbox_mouse_dll.dll</code> 等），程序在启动时会立刻弹出清晰的报错提示框，不再存在“双击没反应”的静默闪退情况。</li>
                 </ul>
             </li>
             <li><strong>放置模型</strong>：将你的 <code>.onnx</code> 模型文件放到目录下的 <code>models</code> 文件夹中。</li>
@@ -372,6 +914,12 @@
             <li><strong>F3</strong>：暂停/恢复瞄准。</li>
             <li><strong>F4</strong>：重新加载配置文件。</li>
             <li><strong>Home</strong>：开启/关闭菜单界面。</li>
+        </ul>
+
+        <h3>5. 界面与防混淆提示新特性</h3>
+        <ul>
+            <li><strong>当前硬件路径 (区块)</strong>：在“采集范围”页面，你会看到清晰的硬件分配指示。分别展示正在录制画面的<strong>[采集源]</strong>，以及真正在执行运算的<strong>[推理设备]</strong>，拒绝设备名混淆。</li>
+            <li><strong>显卡智能调度 (DML)</strong>：使用通用的 DML 版时，底层不再盲目绑定默认的显卡 0。系统会智能检测出最优的 GPU，甚至当你手动瞎配 <code>dml_device_id</code> 时，也能智能回退并展示出实际的详细显卡型号。</li>
         </ul>
 
         <h2>一、 参数全解析：每个参数都在做什么？</h2>
@@ -419,7 +967,7 @@
         </div>
 
         <h3>2. 速度倍率 (Speed Multiplier)</h3>
-        <p>限制了鼠标移动的极值，这个影响跟抢。</p>
+        <p>限制了鼠标移动的极值，这直接影响跟枪手感。<strong>全新版本移除了生硬的最大/最小速度瞬间突变硬切，改为了连续平滑的时间过渡，让拉枪告别死板的机械感。</strong></p>
         <ul>
             <li><strong>最小速度倍率 (Min Speed Multiplier)</strong>: 移动速度的下限乘数。</li>
             <li><strong>最大速度倍率 (Max Speed Multiplier)</strong>: 移动速度的上限乘数。</li>
@@ -432,9 +980,9 @@
         </blockquote>
 
         <h3>3. 轨迹预测 (Prediction)</h3>
-        <p>专为移动靶（跑动的敌人）设计，通过当前位置与上一帧位置的变化，预判其接下来的动向。</p>
+        <p>打移动靶的核心机制。<strong>目前底层现已全部打通且强制走动态 Alpha-Beta 预测链路</strong>，追踪锁敌更精准丝滑。</p>
         <ul>
-            <li><strong>预测间隔 (Prediction Interval)</strong>: 预测的时间间隔参数（> 0 生效）。可以理解为预判未来的时间/距离跨度。</li>
+            <li><strong>预测间隔 (Prediction Interval)</strong>: 预判未来的时间跨度参数（UI 现已提升为保留3位小数的<strong>毫秒级显示</strong>精度）。系统在底层已接入精准延迟补偿引擎，使用公式 <code>基础预测间隔 + 实时推理延迟</code> 计算提前量，彻底解决总是吃尾气慢半拍的问题。</li>
             <li><strong>预测位置数 (Future Positions)</strong>: 取历史多少帧位置数据来进行运动轨迹推演。</li>
         </ul>
         <blockquote>
@@ -457,10 +1005,9 @@
             </li>
             <li><strong>吸附加速倍数 (Snap Boost Factor)</strong>：一旦进入“吸附半径 (Snap)”范围，提供一段最后的速度爆发，防止光标因为上面的减速曲线而卡在目标周围进不去中心。
             </li>
-            <li><strong>EMA 平滑 (Velocity/Move EMA Alpha)</strong>：处理由于画面采集带来的高频抖动。
+            <li><strong>速度估计与 EMA 平滑</strong>：处理由于画面采集或物理操作带来的高频抖动。
                 <ul>
-                    <li>数值 <code>0.1</code>：极度平滑，但响应有明显拖影/延迟。</li>
-                    <li>数值 <code>1.0</code>：无平滑，响应极快但可能肉眼可见的光标发抖（抽搐）。</li>
+                    <li><strong>速度估计平滑系数</strong> / <strong>线性输出平滑系数</strong>：数值越低（如 <code>0.1</code>）极度平滑，但响应有明显拖影/延迟；数值 <code>1.0</code> 意味着无平滑，响应极快但在非绝对稳定环境下会发生准星跟随后微小抽搐。</li>
                 </ul>
             </li>
             <li><strong>PID 增强 (Ki & Kd 比例)</strong>：
@@ -491,16 +1038,22 @@
             AI 会发现：我明明移动了这么多，为什么准星没到？接着 AI 又会再次猛拉，表现为光标疯狂鬼畜摇摆，或者是拉不到位/甩过头。正常情况就是拉枪到目标且不抖动，就说明灵敏度设置正确。
         </blockquote>
 
-        <h3>6. 辅助控制 (WindMouse / 其他输入方式)</h3>
+        <h3>6. 拟人轨迹与微扰 (Bezier / Perturbation)</h3>
         <ul>
-            <li><strong>WindMouse 鼠标移动</strong>：一种模拟真实手部物理手抖轨迹的移动算法。不仅走直线，还会沿着类似抛物线或风力波动的曲线移动到目标，极大增强人性化防检测。
+            <li><strong>Bezier 轨迹曲线</strong>：控制整体拉枪的宿主曲线。启用后，瞄准轨迹会带有人性化的弧度，而非死板的直线寻路。
                 <ul>
-                    <li><strong>重力 (Gravity)</strong> 与 <strong>风力 (Wind)</strong> 决定了轨迹的随机偏移强度，建议保持默认微调即可。</li>
+                    <li><strong>曲线强度</strong>：控制轨迹产生弧度的大小。</li>
                 </ul>
             </li>
-            <li><strong>鼠标输入方式</strong>：决定你向电脑发送鼠标坐标的驱动层级。推荐 GHUB / KMBOX (网盘版或A版) / MAKCU 等硬件/驱动层模拟器，WIN32方式非常容易被反作弊检测。
+            <li><strong>鼠标微扰 (Wind Perturbation)</strong>：在基础轨迹上，施加沿法线方向的随机物理微颤抖（类似手抖）。这种细微的扰动极大程度粉碎反作弊的异常平滑度侦测。
+                <ul>
+                    <li><strong>微扰强度</strong>：只需通过这一个滑条即可控制物理抖动的拟人幅度。拉高增加波动感，但过高会感到屏幕轻微晃动。</li>
+                </ul>
             </li>
+            <li><strong>鼠标输入方式</strong>：推荐使用 GHUB / KMBOX / MAKCU 等外设模拟，以规避反作弊对纯软件 WIN32 进程的监控。</li>
         </ul>
+
+
 
         <h2>二、 科学调参 6 步法：如何从零调出完美手感？</h2>
 
@@ -521,9 +1074,9 @@
 
         <h3>📌 步骤 3：基础跟枪手感打磨（暂闭平滑与增强）</h3>
         <ol>
-            <li>暂且将【EMA 平滑】下的 <strong>速度平滑</strong> 和 <strong>移动平滑</strong> 设为 <code>1.0</code> (完全无平滑)。</li>
-            <li>先把【PID增强】<strong>取消勾选 / 关闭</strong>。</li>
-            <li>先把【轨迹预测】的预测间隔调为 <code>0</code> (关闭)。</li>
+            <li>暂且将【移动修正】面板中的 <strong>速度估计平滑系数</strong> 和 <strong>线性输出平滑系数</strong> 设为 <code>1.0</code> (即无平滑)，或者直接取消勾选 <strong>启用线性输出 EMA 平滑</strong>。</li>
+            <li>先把 <strong>启用 PID 增强</strong> 取消勾选。</li>
+            <li>先把【轨迹预测】的 <strong>预测间隔</strong> 调为 <code>0</code> (关闭)。</li>
             <li>调整 <strong>最小/最大速度倍率</strong>。在靶场看着静止目标按住锁定键。【一般情况0.1就行】
                 <ul>
                     <li>目标：确保拉枪的速度符合预期，<strong>不慢得像蜗牛，也不快得像瞬移</strong>。</li>
@@ -539,7 +1092,7 @@
 
         <h3>📌 步骤 4：消除机械感与抖动（启用平滑）</h3>
         <ol>
-            <li>开始调小【速度平滑系数】和【移动平滑系数】，从 <code>1.0</code> 慢慢往下试（如 <code>0.8</code> -> <code>0.6</code> ->
+            <li>开始缓慢调小 <strong>速度估计平滑系数</strong>（如有需要可勾选并向左调节 <strong>线性输出平滑系数</strong>），从 <code>1.0</code> 慢慢往下试（如 <code>0.8</code> -> <code>0.6</code> ->
                 <code>0.4</code>）。
             </li>
             <li>每降一点，感受一下光标移动是否变得丝滑。</li>
@@ -561,26 +1114,225 @@
             </li>
         </ol>
 
-        <h3>📌 步骤 6：伪装得更像人类（WindMouse 曲线）</h3>
+        <h3>📌 步骤 6：伪装得更像人类（曲线与微扰）</h3>
         <ol>
-            <li>勾选 <strong>启用 WindMouse</strong>。</li>
-            <li>保持默认的【重力 18】和【风力 15】数值测试即可。这会让每次锁定的轨迹路线产生轻微的波纹或弧度转移，躲避反作弊的各种直线向量行为分析。</li>
+            <li>切换到【移动修正】面板，拉到底部，勾选 <strong>启用轨迹曲线</strong> 和 <strong>启用微扰</strong>。</li>
+            <li>通过拖动下方的 <strong>曲线强度</strong> 和 <strong>微扰强度</strong> 滑条来打磨你想要的拟任性。通常只需适度拉高开启一点点（如 <code>0.2 ~ 0.5</code> 区间），即可在保证准度的前提下，让锁敌的轨迹路线发生极具真人的随机浮动和偏移。</li>
         </ol>
+            
+            <h2>🎉 常见疑难解答 (Troubleshooting)</h2>
+            <ul>
+                <li><strong>Q: 双击打开没反应，没有运行或者直接无故消失？</strong><br>
+                    A: 你缺失了核心运行库（如驱动 DLL），仔细留意启动时弹出的报错明细窗，补齐缺少的文件即可。</li>
+                <li><strong>Q: 准星疯狂左摇右晃、抽搐停不下来？</strong><br>
+                    A: 绝对是【游戏配置】里的灵敏度(Sens) 没调整正确，说明参数超调了（数值越低，瞄准拉枪越快；数值越高，瞄准拉枪越慢）。</li>
+                <li><strong>Q: 远距离拉枪很准，但进了近战范围锁定总是差最后一点贴不上？</strong><br>
+                    A: 调高【目标修正】里的【吸附加速倍数 (Snap Boost)】，或者调低【速度曲线指数 (Speed Curve)】。也可能是平滑系数开得太低太拖沓了。</li>
+                <li><strong>Q: 打移动靶时，准星始终在它身后一点点？</strong><br>
+                    A: 开启【PID 增强】，适度加一点 <strong>Ki (积分)</strong> 系数；或者稍微增加【预测间隔】给点提前量。</li>
+            </ul>
 
-        <h2>🎉 常见疑难解答 (Troubleshooting)</h2>
-        <ul>
-            <li><strong>Q: 准星疯狂左摇右晃、抽搐停不下来？</strong><br>
-                A: 绝对是【游戏配置】里的灵敏度(Sens) 分辨率 或 m_yaw 设置和游戏里对应不上，导致程序计算所需位移量算错，反复横跳超调。</li>
-            <li><strong>Q: 远距离拉枪很准，但进了近战范围锁定总是差最后一点贴不上？</strong><br>
-                A: 调高【目标修正】里的【吸附加速倍数 (Snap Boost)】，或者调低【速度曲线指数 (Speed Curve)】。也可能是平滑系数开得太低太拖沓了。</li>
-            <li><strong>Q: 打移动靶时，准星始终在它身后一点点？</strong><br>
-                A: 开启【PID 增强】，适度加一点 <strong>Ki (积分)</strong> 系数；或者稍微增加【预测间隔】给点提前量。</li>
-        </ul>
+        </div> <!-- /#tab-tutorial -->
+
+        <!-- =========== 趣味沙盒面板 =========== -->
+        <div id="tab-playground" class="tab-pane">
+            <h2 style="margin-top: 10px;">🕹️ 互动调参沙盒</h2>
+            
+            <div class="sandbox-container" style="margin-top: 5px; box-shadow: none;">
+                <p style="font-size: 0.95em; color: #4a5568; margin-bottom: 0; line-height: 1.6;">
+                    拖动下方滑块，实时观察【曲线指数】与【微扰强度】对拉枪轨迹的改变。
+                    <br>
+                    <span style="color: #c05621; font-weight: bold;">直观解答误区：</span>你可以发现，所谓的“随机鼠标微扰”只会作用在 <strong style="color: #e53e3e;">大范围拉枪的途中</strong>，当准星贴近敌人身旁时，程序会<strong style="color: #3182ce;">自动将其削弱至 0</strong>，从根本上杜绝了部分玩家担心的“死锁敌人时依然疯狂抽搐”的幻觉。
+                </p>
+                <div class="sandbox-body">
+                    <div class="sandbox-canvas-wrapper">
+                        <div class="sandbox-legend">🔴 移动敌方靶子 &nbsp;&nbsp; ⚪ 你的准星轨迹</div>
+                        <canvas id="simCanvas" width="600" height="400"></canvas>
+                    </div>
+                    <div class="sandbox-controls">
+                        <div class="sandbox-control-group">
+                            <label>速度曲线指数 (Speed Curve) <strong id="val-curve" style="color:#2b6cb0;">1.5</strong></label>
+                            <input type="range" id="simCurve" min="0.5" max="3.0" step="0.1" value="1.5">
+                        </div>
+                        <div class="sandbox-control-group">
+                            <label>微扰强度 (Perturbation) <strong id="val-pert" style="color:#2b6cb0;">2.5</strong></label>
+                            <input type="range" id="simPert" min="0.0" max="5.0" step="0.1" value="2.5">
+                        </div>
+                        <div class="sandbox-control-group">
+                            <label>拉枪基础速度 (Speed Base) <strong id="val-speed" style="color:#2b6cb0;">0.12</strong></label>
+                            <input type="range" id="simSpeed" min="0.02" max="0.30" step="0.01" value="0.12">
+                        </div>
+                        <button class="sandbox-btn" id="simBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            模拟拉枪 / 重置靶位
+                        </button>
+                        <p style="font-size: 0.8em; color: #718096; margin: 5px 0 0 0; line-height: 1.4;">
+                            * 提示：直接在黑色画布内点击任意位置，可自定义瞄准起步点。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="margin: 40px 0; border: 0; border-top: 1px dashed rgba(203, 213, 225, 0.8);">
+
+            <!-- 追加额外的高级 3D 游乐场 iframe -->
+            <div class="sandbox-embed-section" style="margin-bottom: 10px;">
+                <h3 style="margin-top: 0; color: #2d3748; font-size: 1.3em;">🚗 轻松一刻：3D 驾驶游乐场 (Bruno Simon)</h3>
+                <p style="font-size: 0.95em; color: #4a5568; line-height: 1.6; margin-bottom: 15px;">
+                    一直盯着枯燥的参数数据看不仅头晕脑胀，还容易让人越调越暴躁？不如把鼠标放下一边，来这里摸会儿鱼吧。<br>
+                    <strong>休闲解压 🏖️</strong>：我们搬来了享誉全球的 WebGL 标杆之作。点进画面，控制你的越野小车去撞翻积木、按按喇叭、来几个随性的漂移。清空一下压力，休息好了咱们再战！
+                </p>
+                <div style="width: 100%; height: 60vh; min-height: 550px; border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05), 0 8px 25px rgba(0,0,0,0.08); background: #f0c39f;">
+                    <!-- 采用 iframe 嵌入以完美保留原作者复杂的 Three.js 资源与其 Webpack 物理引擎打包上下文，规避跨域阻断 -->
+                    <iframe src="https://2019.bruno-simon.com/" style="width: 100%; height: 100%; border: none;" title="Bruno Simon 3D Car Game"></iframe>
+                </div>
+                <p style="font-size: 0.85em; color: #718096; margin-top: 12px; text-align: center;">
+                    💡 <strong>驾驶提示</strong>：点击上方游戏画面激活焦点，随后使用键盘 <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> 或方向键开车。
+                </p>
+            </div>
+
+        </div> <!-- /#tab-playground -->
+
+        <!-- =========== 更新日志面板 =========== -->
+        <div id="tab-changelog" class="tab-pane">
+            <h2>📅 更新日志 (Changelog)</h2>
+        
+        <div class="timeline-container">
+            <div class="timeline-item important">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-version">v2.1.0</span>
+                        <span class="timeline-badge hot">Latest</span>
+                        <span class="timeline-title">全新拟人轨迹与预测升级</span>
+                    </div>
+                    <div class="timeline-body">
+                        <ul>
+                            <li><strong>里程碑重构</strong>：最大/最小速度由瞬时变动重构为时间平滑过渡，告别死板机械感。</li>
+                            <li><strong>强化预测</strong>：全面打通并接入 Dynamic Alpha-Beta 预测链路，延迟补偿计算更加精准丝滑。</li>
+                            <li><strong>拟人防封</strong>：新增 Bezier 短轨迹规划、物理微扰 (Wind Perturbation) 随机发抖补偿，极限提高轨迹真实度与抗反抽帧侦测能力。</li>
+                            <li><strong>显卡调度</strong>：优化 DML 版本智能选择最优显卡；采集范围页增加可视化推理路径展示。</li>
+                            <li><strong>录制回放</strong>：新增强大的 Aim Debug 录制系统，支持导出波形回放进行手感二次分析。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item important">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-version">v2.0.0</span>
+                        <span class="timeline-badge hot">Major</span>
+                        <span class="timeline-title">AI压枪与硬件适配升级</span>
+                    </div>
+                    <div class="timeline-body">
+                        <ul>
+                            <li><strong>AI压枪修正</strong>：压枪功能变更为智能模式，结合目标锁定状态进行平稳的纵向与轻微横向补偿控制。</li>
+                            <li><strong>透传适配</strong>：无缝适配 CloudPierce Box 等纯硬件级透明透传设备，全面提升链路防检测能力。</li>
+                            <li><strong>底层修复</strong>：修复切换配置时可能误重连键鼠盒子的中断 bug。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-version">v1.9.0</span>
+                        <span class="timeline-title">算法优化与兼容性扩展</span>
+                    </div>
+                    <div class="timeline-body">
+                        <ul>
+                            <li>优化了多项自适应曲线参数与 EMA 平滑权重，全面增强了对无后座绿玩的锁定追击手感。</li>
+                            <li>扩大了 TensorRT 引擎的算力层兼容，无缝覆盖 GTX 1660 直通下世代 RTX 50 系显卡。</li>
+                            <li>修复 MAKCU 控制板的热键响应；提升 OBS 虚拟相机抓取兼容；采集卡新增多路帧率/格式协商。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-version">v1.8.0</span>
+                        <span class="timeline-title">UI重构与视觉满配</span>
+                    </div>
+                    <div class="timeline-body">
+                        <ul>
+                            <li>UI面板主色调强化加强与精美分类小图标全面加护。</li>
+                            <li>引入实用的“自动绘制瞄准范围框”以及距离优先级挂载的多目标防抖过滤。</li>
+                            <li>追加应对长发卡壳的“长 TTK 保持开火”功能，以及各类别敌对角色独立的头身 Y轴 微调高度。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-version">v1.5.0 - v1.7.0</span>
+                        <span class="timeline-title">帧率突破与极限保护</span>
+                    </div>
+                    <div class="timeline-body">
+                        <ul>
+                            <li>为采集卡接入自适应 NV12 硬件解码及极速调度，支持跨格式回退，彻底打破过去锁死 60fps 的天花板。</li>
+                            <li>本机采集(WinRT API)增设多帧留取复用机制破除屏幕物理上限困扰。</li>
+                            <li>界面控制添加长按免解锁 Y 轴等便利键位操作与拉枪极致振幅溢出限制。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-version">v1.1.0 - v1.4.0</span>
+                        <span class="timeline-title">奠基时刻：手感重炼</span>
+                    </div>
+                    <div class="timeline-body">
+                        <ul>
+                            <li>在此确立并引爆了 <code>预测预瞄 + EMA重平滑 + PID微分闭环</code> 的坚固三角瞄准控制基座，一举拔高基础跟踪精度。</li>
+                            <li>完善了不同环境分辨率下的精细扳机识别，分离式 X/Y 轴拉枪占比拆分等首批进阶参数群。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div> <!-- /#tab-changelog -->
 
     </div>
 
-    <!-- 注入 FOV 数据及交互逻辑 -->
+    <!-- 交互逻辑 (Tab & FOV) -->
     <script>
+        // -------------------------
+        // 标签页面切换逻辑
+        // -------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-target');
+                    
+                    // 移除所有的 active 状态
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+                    
+                    // 激活当前点击的
+                    btn.classList.add('active');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+        });
+
+
         // 将 FOV.txt 转换为结构化数据
         const fovData = [
             { name: "CFHD (16:9)", hfov: "95", vfov: "63.088285" },
@@ -630,7 +1382,184 @@
                 }
             });
         });
+
+        // -------------------------
+        // 调参沙盒交互逻辑 (Sandbox)
+        // -------------------------
+        /*
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const simCurve = document.getElementById('simCurve');
+        const simPert = document.getElementById('simPert');
+        const simSpeed = document.getElementById('simSpeed');
+        const valCurve = document.getElementById('val-curve');
+        const valPert = document.getElementById('val-pert');
+        const valSpeed = document.getElementById('val-speed');
+        const simBtn = document.getElementById('simBtn');
+
+        let isSimulating = false;
+        
+        // Target (Enemy)
+        let target = { x: 450, y: 150, tx: 450, ty: 150, time: 0 };
+        // Crosshair (Aim)
+        let ch = { x: 50, y: 250 };
+        // Trail
+        let trail = [];
+
+        // Noise helper for perturbation
+        let noisePhase = 0;
+        let pBaseNoiseTime = 0;
+
+        function resetSim(startX = 50, startY = 250) {
+            ch = { x: startX, y: startY };
+            trail = [];
+            target.tx = Math.random() * 300 + 200; // Random target destination on right side
+            target.ty = Math.random() * 200 + 50;
+            isSimulating = true;
+        }
+
+        // Handle sliding UI
+        simCurve.addEventListener('input', e => valCurve.innerText = e.target.value);
+        simPert.addEventListener('input', e => valPert.innerText = e.target.value);
+        simSpeed.addEventListener('input', e => valSpeed.innerText = e.target.value);
+
+        // Input Button
+        simBtn.addEventListener('click', () => {
+            const rx = Math.random() * 150 + 20; // random left side
+            const ry = Math.random() * 260 + 20;
+            resetSim(rx, ry);
+        });
+
+        // Click on Canvas
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            // Map click to internal coordinates
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            resetSim(x, y);
+        });
+
+        function getNoise(t) {
+            return (Math.sin(t) + Math.sin(t * 2.1) + Math.sin(t * 1.3 + 1)) * 0.33;
+        }
+
+        // Animation Loop
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Move target smoothly (simulating human movement)
+            target.time += 0.02;
+            const swayX = Math.sin(target.time * 0.8) * 40;
+            const swayY = Math.cos(target.time * 1.2) * 20;
+            let currentTargetX = target.tx + swayX;
+            let currentTargetY = target.ty + swayY;
+
+            // 2. Aimbot Logic Simulation
+            if (isSimulating) {
+                const dx = currentTargetX - ch.x;
+                const dy = currentTargetY - ch.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist > 3) { // not reached yet
+                    // Normalize
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+
+                    const curveExp = parseFloat(simCurve.value);
+                    const pertInt = parseFloat(simPert.value);
+                    const speedBase = parseFloat(simSpeed.value) * 120; // local scaling factor
+
+                    // a) Speed calculation (Speed Curve Exponent)
+                    let distRatio = Math.min(dist / 250.0, 1.0);
+                    let speed = Math.max(speedBase * Math.pow(distRatio, curveExp), 2.5); // Min speed 2.5
+                    
+                    if (speed > dist) speed = dist; // cap
+
+                    // b) Perturbation (Noise perpendicular to direction)
+                    // Feature: Active only when far from target (diminishes under 50px)
+                    let pertFactor = Math.min(dist / 50.0, 1.0); 
+                    
+                    pBaseNoiseTime += 0.2;
+                    let noise = getNoise(pBaseNoiseTime);
+                    
+                    // Normal vector is (-ny, nx)
+                    let pX = -ny * noise * pertInt * 2.5 * pertFactor;
+                    let pY = nx * noise * pertInt * 2.5 * pertFactor;
+
+                    ch.x += (nx * speed) + pX;
+                    ch.y += (ny * speed) + pY;
+                }
+
+                // Record trail
+                trail.push({x: ch.x, y: ch.y, alpha: 1.0});
+                if (trail.length > 80) trail.shift();
+            }
+
+            // Update trail alpha
+            for (let i = 0; i < trail.length; i++) {
+                trail[i].alpha -= 0.015;
+            }
+            trail = trail.filter(t => t.alpha > 0);
+
+            // 3. Render
+            
+            // Draw Target Area / Near Radius
+            ctx.beginPath();
+            ctx.arc(currentTargetX, currentTargetY, 50, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Trail
+            if (trail.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(trail[0].x, trail[0].y);
+                for (let i=1; i<trail.length; i++) {
+                    ctx.lineTo(trail[i].x, trail[i].y);
+                }
+                ctx.strokeStyle = 'rgba(74, 222, 128, 0.6)'; // Neon green
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+            }
+
+            // Draw Crosshair
+            ctx.beginPath();
+            ctx.arc(ch.x, ch.y, 4, 0, Math.PI*2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.strokeStyle = '#4ade80';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw Target
+            ctx.beginPath();
+            ctx.arc(currentTargetX, currentTargetY, 8, 0, Math.PI*2);
+            ctx.fillStyle = '#f56565'; // red
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(currentTargetX, currentTargetY, 14, 0, Math.PI*2);
+            ctx.strokeStyle = 'rgba(245, 101, 101, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            requestAnimationFrame(loop);
+        }
+
+        // Start
+        resetSim(50, 250);
+        loop();
+        */
+
     </script>
+    <script src="tutorial-sandbox.js"></script>
 </body>
 
 </html>
