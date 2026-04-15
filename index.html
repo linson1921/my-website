@@ -792,6 +792,97 @@
             z-index: 20;
             letter-spacing: 0.02em;
         }
+
+        /* ======================== */
+        /* QQ 群悬浮按钮样式 */
+        /* ======================== */
+        .floating-qq-container {
+            position: fixed;
+            right: 30px;
+            bottom: 50px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: floatUpDown 4s ease-in-out infinite;
+        }
+
+        .floating-qq-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 12px 18px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(18, 183, 245, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: #2c3e50;
+            gap: 8px;
+        }
+
+        .floating-qq-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(18, 183, 245, 0.25);
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(18, 183, 245, 0.6);
+        }
+
+        .qq-badge {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            font-size: 0.75em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 20px;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
+            animation: pulseBadge 2s infinite;
+        }
+
+        .floating-qq-btn .qq-title {
+            font-weight: 800;
+            font-size: 1.05em;
+            color: #12b7f5;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .floating-qq-btn .qq-desc {
+            font-size: 0.8em;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        @keyframes floatUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes pulseBadge {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .floating-qq-container {
+                right: 15px;
+                bottom: 20px;
+                transform: scale(0.85);
+            }
+            .floating-qq-container:hover {
+                transform: scale(0.85); /* 手机端悬浮位移无变化防误触 */
+            }
+        }
     </style>
 </head>
 
@@ -1202,17 +1293,52 @@
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
                     <div class="timeline-header">
-                        <span class="timeline-version">v2.1.0</span>
+                        <span class="timeline-version">v2.1.2</span>
                         <span class="timeline-badge hot">Latest</span>
+                        <span class="timeline-title">新增雷蛇 RAZER 移动支持</span>
+                    </div>
+                    <div class="timeline-body">
+                        <ul>
+                            <li>增加雷蛇 <code>RAZER</code> 移动方式，支持雷云 3 的鼠标。</li>
+                            <li>输入设备页面新增雷蛇状态提示，连接情况更直观。</li>
+                            <li>雷蛇环境异常时会给出提示，避免莫名闪退。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-item important">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-version">v2.1.1</span>
+                        <span class="timeline-badge hot">Update</span>
+                        <span class="timeline-title">连接稳定性与扳机控制更新</span>
+                    </div>
+                    <div class="timeline-body">
+                        <ul>
+                            <li><strong>连接修复</strong>：修复 MAKCU 盒子自动连接，改善设备自动识别与初始化流程稳定性。</li>
+                            <li><strong>准星找色</strong>：新增准星找色功能，支持围绕准星颜色做检测与相关配置。</li>
+                            <li><strong>自动急停</strong>：新增 net 扳机自动急停，触发时可联动急停控制，提升开火阶段稳定性。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item important">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-version">v2.1.0</span>
+                        <span class="timeline-badge hot">Feature</span>
                         <span class="timeline-title">全新拟人轨迹与预测升级</span>
                     </div>
                     <div class="timeline-body">
                         <ul>
-                            <li><strong>里程碑重构</strong>：最大/最小速度由瞬时变动重构为时间平滑过渡，告别死板机械感。</li>
-                            <li><strong>强化预测</strong>：全面打通并接入 Dynamic Alpha-Beta 预测链路，延迟补偿计算更加精准丝滑。</li>
-                            <li><strong>拟人防封</strong>：新增 Bezier 短轨迹规划、物理微扰 (Wind Perturbation) 随机发抖补偿，极限提高轨迹真实度与抗反抽帧侦测能力。</li>
-                            <li><strong>显卡调度</strong>：优化 DML 版本智能选择最优显卡；采集范围页增加可视化推理路径展示。</li>
-                            <li><strong>录制回放</strong>：新增强大的 Aim Debug 录制系统，支持导出波形回放进行手感二次分析。</li>
+                            <li><strong>强化预测</strong>：接入 Dynamic Alpha-Beta 预测链路，并把延迟补偿接到实时预测与 future positions 的 lookahead 计算。</li>
+                            <li><strong>拟人轨迹</strong>：扩展轨迹系统，加入短 Bezier、线性步进、step quantizer、微扰动、轨迹模式与预设。</li>
+                            <li><strong>调试能力</strong>：新增 Aim Debug 录制与导出能力，便于回放和分析瞄准过程。</li>
+                            <li><strong>设备体验</strong>：新增 MAKCU 自动匹配与 Auto 串口 / 波特率配置，并优化 DML 推理设备选择与显示。</li>
+                            <li><strong>界面与稳定性</strong>：优化速度切换与 `predictionInterval` 显示，补强虚拟相机启动 / 切换稳定性。</li>
                         </ul>
                     </div>
                 </div>
@@ -2484,6 +2610,25 @@
 }());
 
     </script>
+
+    <!-- ======================== -->
+    <!-- QQ 群悬浮按钮 -->
+    <!-- ======================== -->
+    <div class="floating-qq-container">
+        <a class="floating-qq-btn" target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=Us1GlzxXy_xvLcoOQ81qI1uiqA3E77EJ&jump_from=webapi&authKey=YcfTz1hJlXyi6pWYMKbvU/mvnbjP1cuq+meGA7MdgJjkAvsasgZMTbOsacAa2LNr">
+            <span class="qq-badge">内测交流</span>
+            <div class="qq-title">
+                <svg t="1775716899256" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1703" xmlns:xlink="http://www.w3.org/1999/xlink" width="22" height="22">
+                    <path d="M666.122449 909.061224c-10.44898 0-21.420408-1.044898-31.869388-2.612244-39.183673-4.702041-74.710204-23.510204-100.832653-53.289796-13.583673 5.22449-28.212245 5.22449-41.795918 0-21.420408 28.212245-61.64898 48.065306-108.669388 53.289796-66.35102 7.314286-138.44898-11.493878-144.718367-55.379592-5.22449-34.481633 37.093878-61.126531 81.502041-75.755102-25.6-28.212245-43.363265-63.738776-51.2-101.355102l-0.522449 0.522449c-25.077551 31.346939-41.795918 50.155102-61.126531 50.155102-2.089796 0-4.179592-0.522449-6.269388-1.044898-7.314286-2.612245-13.061224-8.881633-17.240816-18.808164-16.195918-34.481633-9.404082-100.310204 15.15102-150.465306 0 0 0-0.522449 0.522449-0.522449 12.538776-22.465306 27.689796-43.363265 45.453061-62.171428-6.269388-11.493878-10.44898-24.032653-12.016326-37.093878v-3.134694c0.522449-19.330612 10.44898-37.093878 26.644898-47.542857-10.971429-73.142857 9.926531-147.330612 58.514286-203.232653 49.110204-56.946939 120.163265-88.816327 194.873469-86.204081h4.702041c65.306122 0 129.567347 26.122449 177.110204 72.097959 49.110204 47.542857 76.8 112.326531 77.844898 180.767347v7.314285c0.522449 9.926531 0 19.330612-1.044898 29.257143 14.106122 8.881633 21.420408 20.37551 21.420408 48.065306 0 13.583673-1.044898 27.689796-9.926531 36.04898 13.061224 17.763265 28.734694 42.840816 41.27347 62.693877l2.612245 4.179592c20.37551 32.391837 23.510204 74.187755 22.987755 96.130613 0 17.240816-2.089796 58.514286-18.285714 70.530612-3.657143 2.612245-7.314286 3.657143-12.016327 3.657143h-4.179592c-26.122449 0-41.273469-23.510204-57.991837-48.587755l-1.567347-2.089796c-8.881633 36.571429-26.122449 71.053061-50.677551 99.265306 27.167347 9.404082 83.069388 31.346939 75.755103 73.142857-5.746939 35.526531-55.902041 62.171429-114.416327 62.171428z m-388.702041-63.738775z m250.253061-11.493878z m276.375511-140.016326z m-47.020409-235.102041z" fill="#7BD4EF" p-id="1704"></path>
+                </svg>
+                加入Q群
+            </div>
+            <div class="qq-desc" style="text-align: center; line-height: 1.4;">
+                群号: <span style="font-family: Consolas, monospace; font-weight: 800; color: #12b7f5; font-size: 1.1em;">891746243</span><br>
+                获取新版本，同时和群友开黑！
+            </div>
+        </a>
+    </div>
 </body>
 
 </html>
