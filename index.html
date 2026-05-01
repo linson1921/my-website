@@ -1094,14 +1094,21 @@
         }
 
         .param-group .group-tag {
-            font-family: "JetBrains Mono", Consolas, monospace;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 38px;
+            line-height: 1;
+            font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
             font-size: 0.72em;
             font-weight: 700;
-            padding: 2px 8px;
+            padding: 4px 8px;
             border-radius: var(--radius-xs);
             background: var(--color-primary-500);
             color: #fff;
-            letter-spacing: 0.06em;
+            letter-spacing: 0;
+            font-style: normal;
+            white-space: nowrap;
         }
 
         .param-group .group-hint {
@@ -1880,6 +1887,78 @@
 
         [data-theme="dark"] .section-pill--warn { color: #fbd38d; }
 
+        .section-pill--recommended {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            color: #047857;
+            background: linear-gradient(135deg, rgba(209, 250, 229, 0.92), rgba(236, 253, 245, 0.82));
+            border-color: rgba(16, 185, 129, 0.38);
+            box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+            animation: section-pill-recommended-confirm 3.6s cubic-bezier(.2,.8,.2,1) infinite;
+        }
+
+        [data-theme="dark"] .section-pill--recommended {
+            color: #a7f3d0;
+            background: linear-gradient(135deg, rgba(6, 95, 70, 0.48), rgba(20, 83, 45, 0.34));
+            border-color: rgba(52, 211, 153, 0.36);
+        }
+
+        .section-pill--recommended::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: inherit;
+            background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.46) 42%, transparent 72%);
+            transform: translateX(-115%);
+            animation: section-pill-recommended-glide 3.6s cubic-bezier(.2,.8,.2,1) infinite;
+            pointer-events: none;
+        }
+
+        @keyframes section-pill-recommended-confirm {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+            }
+            14% {
+                transform: translateY(-1px) scale(1.025);
+                box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08), 0 6px 18px rgba(16, 185, 129, 0.18);
+            }
+            28% {
+                transform: translateY(0) scale(1);
+                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        @keyframes section-pill-recommended-glide {
+            0% { transform: translateX(-115%); opacity: 0; }
+            10% { opacity: 0.9; }
+            32%, 100% { transform: translateX(115%); opacity: 0; }
+        }
+
+        .section-pill--risk {
+            animation: section-pill-risk-breathe 2.6s ease-in-out infinite;
+        }
+
+        @keyframes section-pill-risk-breathe {
+            0%, 100% {
+                border-color: rgba(221, 107, 32, 0.25);
+                box-shadow: 0 0 0 rgba(221, 107, 32, 0);
+            }
+            50% {
+                border-color: rgba(221, 107, 32, 0.55);
+                box-shadow: 0 0 10px rgba(221, 107, 32, 0.16);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .section-pill--recommended,
+            .section-pill--recommended::after,
+            .section-pill--risk {
+                animation: none;
+            }
+        }
+
         /* 步骤编号(科学调参 6 步法 h3) */
         h3 .step-num {
             display: inline-flex;
@@ -2052,62 +2131,138 @@
             </ul>
 
             <h3>2. 采集方式与硬件连接详解</h3>
-            <p>为了获得最低的延迟和最佳的安全性，本程序支持多种画面采集方式。请根据你的硬件环境选择：</p>
-            <ul>
-                <li><strong>常规本机采集 (Duplication API)</strong>
+            <p>为了获得最低的延迟和最佳的安全性，本程序支持多种画面采集方式。下面 6 种按「硬件门槛 → 隔离强度」排列，可根据自己的环境挑一种使用。</p>
+
+            <!-- 1) Duplication API -->
+            <div class="param-group">
+                <span class="group-tag">本机</span> 常规本机采集 (Duplication API)
+                <span class="section-pill">单机 · 零配置</span>
+                <span class="section-pill section-pill--warn section-pill--risk">高风险 · 仅靶场</span>
+            </div>
+            <p>最朴素的本机采集方式，无需任何额外软硬件，开箱即用。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>直接调用 Windows 的桌面复制接口（Desktop Duplication API），从当前显示器抓取画面。</dd>
+                <dt>配置</dt>
+                <dd><code>capture_method</code> 设置为 <code>duplication_api</code>。</dd>
+                <dt>优点</dt>
+                <dd>无需额外硬件，延迟极低，适配性最广。</dd>
+            </dl>
+
+            <!-- 2) WinRT -->
+            <div class="param-group">
+                <span class="group-tag">本机</span> WinRT 窗口 / 显示器采集
+                <span class="section-pill">单机 · 按窗口</span>
+                <span class="section-pill section-pill--warn section-pill--risk">高风险 · 仅靶场</span>
+            </div>
+            <p>面向 Win10/11 的现代采集接口，可以只抓特定游戏窗口，不受其它窗口遮挡影响。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>使用 Windows Graphics Capture 接口，可按窗口或按显示器定向采集，支持游戏全屏 / 窗口化，遮挡被忽略。</dd>
+                <dt>配置</dt>
+                <dd><code>capture_method</code> 设置为 <code>winrt</code>，再在「采集目标」里选「显示器」或「窗口」。</dd>
+                <dt>适用</dt>
+                <dd>希望只抓特定游戏窗口、或本机采集但对 Duplication 兼容性不佳时。</dd>
+            </dl>
+
+            <!-- 3) NDI -->
+            <div class="param-group">
+                <span class="group-tag">网络</span> NDI 网络采集
+                <span class="section-pill">网络流 · 双机/手机</span>
+            </div>
+            <p>从局域网内的 NDI 源（OBS、手机、副机）接收画面，AI 机不直接抓桌面，规避部分桌面级检测。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>从 OBS NDI、Android NDI Sender 或其它 NDI 源接收视频流，AI 机不需要直接抓桌面或窗口。</dd>
+                <dt>配置</dt>
+                <dd><code>capture_method</code> 设置为 <code>ndi_capture</code>，在「采集」页选择 NDI 源；也可以手动填写 <code>ndi_source_name</code> / <code>ndi_source_address</code>。</dd>
+                <dt>适用</dt>
+                <dd>已有 OBS / NDI 推流链路、手机或副机能稳定输出 NDI，且局域网质量较好时。</dd>
+                <dt>双机局域网快速教程</dt>
+                <dd>
                     <ul>
-                        <li><strong>原理</strong>：直接调用 Windows 的桌面复制接口，适合单机使用。</li>
-                        <li><strong>配置</strong>：<code>capture_method</code> 设置为 <code>duplication_api</code>。</li>
-                        <li><strong>优点</strong>：无需额外硬件，延迟极低，适配性最广。</li>
+                        <li><strong>准备网络</strong>：主机（画面来源电脑）和 AI 机（运行本程序的电脑）接入同一个局域网，优先使用有线网；Windows 网络类型建议设为「专用网络」。</li>
+                        <li><strong>下载工具</strong>：到 NDI 官方下载 <a href="https://ndi.video/tools/" target="_blank" rel="noopener">NDI Tools</a>。主机至少需要 <strong>NDI Screen Capture</strong> 用来发送桌面 / 游戏画面；AI 机建议安装 <strong>NDI Studio Monitor</strong> 先测试能否看到主机画面。</li>
+                        <li><strong>主机设置</strong>：在主机启动 <strong>NDI Screen Capture</strong>，允许防火墙访问局域网；如果有多块网卡，优先保留当前和 AI 机互通的网卡。</li>
+                        <li><strong>AI 机测试</strong>：在 AI 机打开 <strong>NDI Studio Monitor</strong>，菜单里应能看到主机发出的 NDI 源；能正常预览后，再进入本程序选择 <code>ndi_capture</code>。</li>
+                        <li><strong>程序设置</strong>：在「采集」页选择 NDI 源；如果列表为空，可以把源名称填到 <code>ndi_source_name</code>，或把主机局域网 IP 填到 <code>ndi_source_address</code> 辅助连接。</li>
                     </ul>
-                </li>
-                <li><strong>WinRT 窗口/显示器采集</strong>
-                    <ul>
-                        <li><strong>原理</strong>：Windows Graphics Capture 接口，可按窗口或按显示器定向采集，支持游戏全屏/窗口化，遮挡被忽略。</li>
-                        <li><strong>配置</strong>：<code>capture_method</code> 设置为 <code>winrt</code>，再在「采集目标」里选「显示器」或「窗口」。</li>
-                        <li><strong>适用</strong>：希望只抓特定游戏窗口、或本机采集但对 Duplication 兼容性不佳时。</li>
-                    </ul>
-                </li>
-                <li><strong>UDP 异步采集（双机网络推流）</strong>
-                    <ul>
-                        <li><strong>原理</strong>：在「游戏机（发送端）」截取画面并压缩，通过局域网发送到「AI 机（接收端）」。AI 机只负责目标检测和控制。</li>
-                        <li><strong>风险提示</strong>：推流流程在部分厂商反作弊环境下可能被识别到桌面抓取/网卡异常流量，<span class="highlight">不建议在高风险检测的商业游戏上使用</span>，仅适合练习靶场 / 自研 / 低风控场景。</li>
-                        <li><strong>发送端设置</strong>：使用 FFmpeg 将桌面流推送至接收端 IP。示例命令：
-                            <div class="code-block" data-lang="bash">
-                                <button class="code-copy" type="button" aria-label="复制">
-                                    <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                                    复制
-                                </button>
+                </dd>
+                <dt>注意</dt>
+                <dd>NDI 依赖局域网发现和防火墙放行；源不出现时先检查两台机器是否同网段、主机 Screen Capture 是否正在运行、Windows 防火墙是否允许 NDI、AI 机是否能用 Studio Monitor 看到画面。</dd>
+            </dl>
+
+            <!-- 4) scrcpy -->
+            <div class="param-group">
+                <span class="group-tag">手机</span> scrcpy 手机画面采集
+                <span class="section-pill">Android · USB</span>
+            </div>
+            <p>把 Android 手机画面通过 USB 调试拉到 PC，再交给 AI 推理，专门服务手游 / 模拟器之外的真机场景。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>通过 USB 调试启动 / 连接 scrcpy，把 Android 手机画面作为采集源，再按检测分辨率居中裁切给 AI 推理。</dd>
+                <dt>配置</dt>
+                <dd><code>capture_method</code> 设置为 <code>scrcpy_capture</code>，填写 scrcpy 路径；多设备时再指定 <code>scrcpy_device_serial</code>。</dd>
+                <dt>适用</dt>
+                <dd>手机画面采集、手机游戏画面预览、需要把推理输入固定到 <code>256×256</code> / <code>416×416</code> 等小尺寸时。</dd>
+                <dt>边界</dt>
+                <dd>当前主线只负责采集 / 预览 / 裁切，<strong>不提供 scrcpy 触控注入</strong>；手机端输入请继续使用你自己的映射软件、硬件盒子或其它外部方案。</dd>
+            </dl>
+
+            <!-- 5) UDP -->
+            <div class="param-group">
+                <span class="group-tag">双机</span> UDP 异步采集（双机网络推流）
+                <span class="section-pill section-pill--warn">高风险 · 仅靶场</span>
+            </div>
+            <p>「游戏机」推流到「AI 机」的双机方案，AI 机不接触游戏机。但推流流程在主流反作弊下并不安全，请只在靶场 / 自研环境使用。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>在「游戏机（发送端）」截取画面并压缩，通过局域网发送到「AI 机（接收端）」。AI 机只负责目标检测和控制。</dd>
+                <dt>风险提示</dt>
+                <dd>推流流程在部分厂商反作弊环境下可能被识别到桌面抓取 / 网卡异常流量，<span class="highlight">不建议在高风险检测的商业游戏上使用</span>，仅适合练习靶场 / 自研 / 低风控场景。</dd>
+                <dt>发送端设置</dt>
+                <dd>
+                    使用 FFmpeg 将桌面流推送至接收端 IP。示例命令：
+                    <div class="code-block" data-lang="bash">
+                        <button class="code-copy" type="button" aria-label="复制">
+                            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            复制
+                        </button>
 <code>ffmpeg -f gdigrab -framerate 60 -i desktop -vf scale=640:640 -vcodec mjpeg -q:v 5 -f mjpeg udp://接收端IP:1234</code>
-                            </div>
-                        </li>
-                        <li><strong>你也可以使用 OBS 双机推流，去 B 站找教程即可。</strong></li>
-                        <li><strong>接收端设置</strong>：
-                            <ul>
-                                <li>在菜单中将 <code>capture_method</code> 设置为 <code>udp_capture</code>。</li>
-                                <li>确保 IP 设置为 <code>0.0.0.0</code>（监听所有地址）或指定的发送端 IP。</li>
-                                <li>开放防火墙 UDP 端口（默认 1234）。</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li><strong>虚拟相机 / 采集卡 物理隔离流派 <span class="highlight">最大程度规避反作弊对采集行为的检测</span></strong>
+                    </div>
+                    也可以使用 <strong>OBS 双机推流</strong>，去 B 站找教程即可。
+                </dd>
+                <dt>接收端设置</dt>
+                <dd>
                     <ul>
-                        <li><strong>原理</strong>：把游戏机画面通过 HDMI 采集卡送进 AI 机，程序以系统层面的视频捕获设备（Media Foundation）直接读取画面；也可用于读取 OBS 虚拟摄像头、直播软件输出等任何注册为视频设备的来源。</li>
-                        <li><strong>硬件连接</strong>：<code>游戏机 HDMI 输出</code> ➔ <code>HDMI 一分二 (或带环出的采集卡)</code> ➔
-                            <code>采集卡 USB</code> ➔ <code>AI 机</code>。
-                        </li>
-                        <li><strong>软件配置</strong>：
-                            <ul>
-                                <li>在菜单中将「采集方式」设置为 <strong>虚拟相机</strong>（<code>capture_method = virtual_camera</code>）。</li>
-                                <li>在「选择虚拟相机」下拉里找到你的采集卡名称并选中（列表可用「过滤」输入框快速筛选）。</li>
-                                <li><strong>宽高建议</strong>：通常设置为 <code>1920×1080</code> 或 <code>1280×720</code>，程序会自动在中心裁剪出 AI 运算区域。</li>
-                                <li><strong>编码格式</strong>： 优先推荐<code>NV12</code> ；默认自动协商无需干预。自己设定240fps即可</li>
-                            </ul>
-                        </li>
+                        <li>在菜单中将 <code>capture_method</code> 设置为 <code>udp_capture</code>。</li>
+                        <li>接收端 IP 保持默认 <code>0.0.0.0</code>（监听所有网卡）即可；不要照其它教程填写 <code>192.168.x.x</code> 这类局域网 IP，否则可能连不上画面。</li>
+                        <li>端口需要和发送端保持一致，并开放防火墙 UDP 端口（默认 <code>1234</code>）。</li>
                     </ul>
-                </li>
-            </ul>
+                </dd>
+            </dl>
+
+            <!-- 6) 虚拟相机 / 采集卡 -->
+            <div class="param-group">
+                <span class="group-tag">双机</span> 虚拟相机 / 采集卡（物理隔离流派）
+                <span class="section-pill section-pill--recommended">最推荐 · 物理隔离</span>
+            </div>
+            <p>把游戏机画面通过 HDMI 采集卡送进 AI 机，<span class="highlight">最大程度规避反作弊对采集行为的检测</span>，是目前最安全、最稳定的方案。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>把游戏机画面通过 HDMI 采集卡送进 AI 机，程序以系统层面的视频捕获设备（Media Foundation）直接读取画面；也可用于读取 OBS 虚拟摄像头、直播软件输出等任何注册为视频设备的来源。</dd>
+                <dt>硬件连接</dt>
+                <dd><code>游戏机 HDMI 输出</code> ➔ <code>HDMI 一分二（或带环出的采集卡）</code> ➔ <code>采集卡 USB</code> ➔ <code>AI 机</code>。</dd>
+                <dt>软件配置</dt>
+                <dd>
+                    <ul>
+                        <li>在菜单中将「采集方式」设置为 <strong>虚拟相机</strong>（<code>capture_method = virtual_camera</code>）。</li>
+                        <li>在「选择虚拟相机」下拉里找到你的采集卡名称并选中（列表可用「过滤」输入框快速筛选）。</li>
+                        <li><strong>宽高建议</strong>：通常设置为 <code>1920×1080</code> 或 <code>1280×720</code>，程序会自动在中心裁剪出 AI 运算区域。</li>
+                        <li><strong>编码格式</strong>：优先推荐 <code>NV12</code>；默认自动协商无需干预。帧率自己设定 240fps 即可。</li>
+                    </ul>
+                </dd>
+            </dl>
 
             <h3>3. 如何运行</h3>
             <ol>
@@ -2498,7 +2653,7 @@
             <div class="subtab-pane" data-subtab="mouse-tactical" data-group="param-menu">
 
                 <h3>准星找色 (Reticle Color Detection)</h3>
-                <p>基于颜色阈值的辅助锁定补偿机制。当 AI 检测框与你画面上某个颜色标记（例如敌人红色描边、队友蓝色描边）匹配时，精细修正锁敌点。适合描边增强 / 鲜艳皮肤的游戏。</p>
+                <p>从屏幕中心向外搜索预设的准星颜色，定位准星色块的实际中心，计算它与屏幕几何中心之间的像素偏差，并把这个偏差作为补偿量叠加到瞄准输出上。适合开镜后准星不在屏幕正中、或准星因后坐力 / 抖动 / 缩放与几何中心存在固定偏移的游戏。</p>
                 <dl class="param-list">
                     <dt>启用准星找色</dt>
                     <dd>总开关，关闭时所有找色配置均不生效。</dd>
@@ -2649,7 +2804,8 @@
                         AI 推理图像的边长（正方形），默认 <code>320</code>。<strong>⚠️ 注意：该参数仅在「动态输入尺寸」的模型上才会生效</strong>。
                         <ul>
                             <li><strong>静态输入模型（主流 YOLO 导出 / 绝大多数公开发布模型）</strong>：真正的推理尺寸由模型自己固定（例如导出时填的 <code>640×640</code> / <code>416×416</code>），<strong>软件会自动探测并用模型尺寸覆盖此参数</strong>，这里填多少都不生效。</li>
-                            <li><strong>动态输入模型（导出时勾选了 <code>dynamic axes</code>）</strong>：此值才真正决定推理图像边长。数值越大精度越高但 FPS 越低；一般按显卡选 <code>GTX 16xx/20 系：320 ~ 480；RTX 30/40 系：640 ~ 720</code>。</li>
+                            <li><strong>动态输入模型（导出时勾选了 <code>dynamic axes</code>）</strong>：此值才真正决定推理图像边长。数值越大精度越高但 FPS 越低；常用档位包含 <code>160</code> / <code>256</code> / <code>320</code> / <code>416</code> / <code>640</code>。</li>
+                            <li><strong>scrcpy 手机采集</strong>：切到 <code>scrcpy_capture</code> 时，程序会按检测分辨率生成居中裁切区域，让 AI 看到 <code>256×256</code>、<code>416×416</code> 这类逻辑画面，而不是直接拿手机完整分辨率推理。切换检测分辨率后会重新拉起 scrcpy，使裁切参数同步生效。</li>
                         </ul>
                         <strong>简言之：想调推理尺寸，请在导出模型时设定；这里一般无需手动改。</strong>
                     </dd>
@@ -2676,6 +2832,8 @@
                             <li><code>duplication_api</code>：本机采集，延迟最低。</li>
                             <li><code>winrt</code>：WinRT 窗口 / 显示器采集。</li>
                             <li><code>virtual_camera</code>：<strong>虚拟相机 / 采集卡</strong>，物理隔离流派。</li>
+                            <li><code>ndi_capture</code>：NDI 网络视频源，适合 OBS NDI、Android NDI Sender 或副机推流。</li>
+                            <li><code>scrcpy_capture</code>：Android 手机画面采集，适合 USB 调试 + scrcpy 的手机画面预览与 AI 裁切推理。</li>
                             <li><code>udp_capture</code>：UDP 推流，双机网络方案。</li>
                         </ul>
                     </dd>
@@ -2717,10 +2875,55 @@
                     </div>
                 </div>
 
+                <h3>NDI 采集</h3>
+                <dl class="param-list">
+                    <dt>NDI 源名称 (ndi_source_name)</dt>
+                    <dd>优先按名称匹配 NDI 源，例如 OBS、Android NDI Sender 或其它 NDI 发送端显示出的源名。源列表中看不到时，先确认发送端已开始输出、两台设备在同一局域网、防火墙允许 NDI 通信。</dd>
+
+                    <dt>NDI 源地址 (ndi_source_address)</dt>
+                    <dd>可选的手动地址 / 备用匹配信息。一般用户优先用下拉源名称即可；网络发现不稳定时再填写发送端地址辅助匹配。</dd>
+
+                    <dt>自动重连 (ndi_auto_reconnect)</dt>
+                    <dd>开启后，NDI 源断开、重启或短暂离线时会自动尝试恢复，适合手机投流、OBS 重启、无线网络轻微波动的场景。</dd>
+                </dl>
+                <div class="callout callout--tip">
+                    <div class="callout-icon">
+                        <svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+                    </div>
+                    <div class="callout-content">
+                        <span class="callout-title">NDI 使用建议</span>
+                        <p>NDI 更适合已经有 OBS / 手机 NDI Sender / 副机推流链路的用户。它比 UDP 手写命令更易管理，但仍依赖网络质量；画面卡顿时优先检查 Wi-Fi、交换机、防火墙和发送端帧率。</p>
+                    </div>
+                </div>
+
+                <h3>scrcpy 手机画面采集</h3>
+                <dl class="param-list">
+                    <dt>scrcpy 路径 (scrcpy_executable_path)</dt>
+                    <dd>填写 <code>scrcpy.exe</code> 的路径；如果使用整包发布或默认目录，程序会尝试自动查找。首次使用前请确保手机已开启 USB 调试，并且电脑能通过 adb 识别设备。</dd>
+
+                    <dt>设备序列号 (scrcpy_device_serial)</dt>
+                    <dd>多台 Android 设备同时连接时填写指定设备序列号；只连接一台手机时可以留空。</dd>
+
+                    <dt>最大尺寸 / 码率 / 编码器</dt>
+                    <dd><code>scrcpy_max_size</code> 控制 scrcpy 传输画面上限，<code>scrcpy_video_bit_rate</code> 控制码率，<code>scrcpy_video_codec</code> 可选 <code>h264</code> / <code>h265</code> / <code>av1</code>（具体取决于设备和 scrcpy 支持）。优先保持默认，只有画面延迟、压缩痕迹或设备兼容性有问题时再调。</dd>
+
+                    <dt>AI 裁切与检测分辨率</dt>
+                    <dd>scrcpy 启动时会根据当前检测分辨率生成居中裁切参数。例如选择 <code>256</code> 就让 AI 处理 <code>256×256</code> 的逻辑画面，选择 <code>416</code> 就处理 <code>416×416</code>。这比采集完整手机分辨率更适合低延迟推理；切换检测分辨率后程序会重新启动 scrcpy 以应用新的裁切区域。</dd>
+                </dl>
+                <div class="callout callout--warn">
+                    <div class="callout-icon">
+                        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    </div>
+                    <div class="callout-content">
+                        <span class="callout-title">scrcpy 只作为采集路径</span>
+                        <p>当前主线不提供 scrcpy 触控注入，也不把手机瞄准输入作为内置方案。手机端实际操作请使用你自己的映射软件、外设硬件、手柄映射或其它独立输入链路。</p>
+                    </div>
+                </div>
+
                 <h3>UDP 采集 (双机推流)</h3>
                 <dl class="param-list">
                     <dt>UDP IP</dt>
-                    <dd>接收端监听 IP。<code>0.0.0.0</code> = 监听所有网卡；填具体 IP 可以限定只接受某台机器。</dd>
+                    <dd>接收端监听 IP。默认保持 <code>0.0.0.0</code> 即可，表示监听所有网卡。不要填写 <code>192.168.x.x</code> 这类局域网地址；本软件不是在这里填发送端 IP，填错会导致收不到画面。</dd>
 
                     <dt>UDP 端口</dt>
                     <dd>默认 <code>1234</code>。发送端 FFmpeg 命令中的端口需与之一致，并在 Windows 防火墙放行该端口。</dd>
@@ -3199,8 +3402,26 @@
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
                         <div class="timeline-header">
-                            <span class="timeline-version">v2.1.3</span>
+                            <span class="timeline-version">v2.1.4</span>
                             <span class="timeline-badge hot">Latest</span>
+                            <span class="timeline-title">NDI 与 scrcpy 手机采集更新</span>
+                        </div>
+                        <div class="timeline-body">
+                            <ul>
+                                <li><strong>新增 NDI 采集</strong>：支持从 OBS NDI、Android NDI Sender 或其它 NDI 源接收画面，并提供源名称、源地址与自动重连配置。</li>
+                                <li><strong>新增 scrcpy 手机画面采集</strong>：支持通过 scrcpy 获取 Android 手机画面，适合手机画面预览与 AI 推理输入。</li>
+                                <li><strong>AI 裁切优化</strong>：scrcpy 会按检测分辨率生成居中裁切区域，支持 <code>256×256</code>、<code>416×416</code> 等更适合推理的小画面。</li>
+                                <li><strong>工作流边界</strong>：scrcpy 当前只作为采集 / 预览 / 裁切路径，不包含手机触控注入；输入控制继续使用外部映射或硬件方案。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item important" data-category="update">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <span class="timeline-version">v2.1.3</span>
+                            <span class="timeline-badge hot">Update</span>
                             <span class="timeline-title">动态瞄准范围与界面体验升级</span>
                         </div>
                         <div class="timeline-body">
