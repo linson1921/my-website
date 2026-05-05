@@ -1959,6 +1959,187 @@
             }
         }
 
+        /* =========================================== */
+        /*  云游戏推广卡片                              */
+        /* =========================================== */
+        .cloud-promo-hook {
+            margin: 14px 0 18px;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(235, 248, 255, 0.85), rgba(236, 253, 245, 0.7));
+            border: 1px solid rgba(49, 130, 206, 0.18);
+            color: var(--color-text-soft);
+            font-size: 0.96em;
+            line-height: 1.7;
+        }
+
+        [data-theme="dark"] .cloud-promo-hook {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.32), rgba(6, 95, 70, 0.28));
+            border-color: rgba(96, 165, 250, 0.22);
+        }
+
+        .cloud-promo-hook strong {
+            color: var(--color-primary-600);
+        }
+
+        [data-theme="dark"] .cloud-promo-hook strong {
+            color: var(--color-primary-200);
+        }
+
+        .cloud-promo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 18px 0 8px;
+        }
+
+        @media (max-width: 720px) {
+            .cloud-promo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .cloud-promo-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 18px 20px;
+            border-radius: var(--radius-lg);
+            background: var(--color-surface-raised);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+            overflow: hidden;
+        }
+
+        .cloud-promo-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary-400), var(--color-accent-400));
+            opacity: 0.85;
+        }
+
+        .cloud-promo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(49, 130, 206, 0.35);
+        }
+
+        .cloud-promo-card__head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .cloud-promo-card__title {
+            font-size: 1.08em;
+            font-weight: 700;
+            color: var(--color-text);
+            margin: 0;
+        }
+
+        .cloud-promo-card__tag {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.74em;
+            font-weight: 600;
+            color: var(--color-primary-600);
+            background: var(--color-primary-50);
+            border: 1px solid rgba(49, 130, 206, 0.22);
+            border-radius: var(--radius-pill);
+        }
+
+        [data-theme="dark"] .cloud-promo-card__tag {
+            color: var(--color-primary-200);
+            background: rgba(49, 130, 206, 0.18);
+            border-color: rgba(96, 165, 250, 0.28);
+        }
+
+        .cloud-promo-card__desc {
+            color: var(--color-text-muted);
+            font-size: 0.92em;
+            line-height: 1.65;
+            margin: 0 0 10px;
+        }
+
+        .cloud-promo-card__points {
+            margin: 0 0 14px;
+            padding-left: 18px;
+            color: var(--color-text-soft);
+            font-size: 0.9em;
+            line-height: 1.7;
+        }
+
+        .cloud-promo-card__points li {
+            margin-bottom: 4px;
+        }
+
+        .cloud-promo-card__invite {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: var(--color-info-bg);
+            border-radius: var(--radius-sm);
+            font-size: 0.86em;
+            color: var(--color-text-muted);
+        }
+
+        .cloud-promo-card__invite code {
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-weight: 700;
+            color: var(--code-fg);
+            background: var(--code-bg);
+            padding: 2px 8px;
+            border-radius: var(--radius-xs);
+            letter-spacing: 0.04em;
+        }
+
+        .cloud-promo-card__cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: auto;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.94em;
+            color: #fff;
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+            text-decoration: none;
+            transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+            box-shadow: 0 2px 8px rgba(49, 130, 206, 0.3);
+        }
+
+        .cloud-promo-card__cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(49, 130, 206, 0.45);
+        }
+
+        .cloud-promo-card__cta svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cloud-promo-disclaimer {
+            margin: 8px 0 0;
+            font-size: 0.82em;
+            color: var(--color-text-dim);
+            text-align: right;
+        }
+
         /* 步骤编号(科学调参 6 步法 h3) */
         h3 .step-num {
             display: inline-flex;
@@ -2131,96 +2312,102 @@
             </ul>
 
             <h3>2. 采集方式与硬件连接详解</h3>
-            <p>为了获得最低的延迟和最佳的安全性，本程序支持多种画面采集方式。下面 6 种按「硬件门槛 → 隔离强度」排列，可根据自己的环境挑一种使用。</p>
+            <p>为了获得最低的延迟和最佳的安全性，本程序支持多种画面采集方式。下面 7 种按「隔离强度 → 硬件门槛」从高到低排列，<strong>越靠前越安全、越靠后越方便</strong>，可根据自己的环境挑一种使用。</p>
 
-            <!-- 1) Duplication API -->
+            <!-- 1) 云游戏 -->
             <div class="param-group">
-                <span class="group-tag">本机</span> 常规本机采集 (Duplication API)
-                <span class="section-pill">单机 · 零配置</span>
-                <span class="section-pill section-pill--warn section-pill--risk">高风险 · 仅靶场</span>
+                <span class="group-tag">云端</span> 云游戏采集（远程运行 · 本地推理）
+                <span class="section-pill section-pill--recommended">最安全 · 远程隔离</span>
+                <span class="section-pill">零硬件 · 新手友好</span>
             </div>
-            <p>最朴素的本机采集方式，无需任何额外软硬件，开箱即用。</p>
+            <p class="cloud-promo-hook">
+                AI 在游戏里拉不动、没效果？没有硬件盒子又怕本机程序被反作弊扫到？<strong>把游戏跑到云端、AI 跑在本地</strong>，零硬件成本快速体验「双机隔离」的安全感。
+            </p>
+            <p>游戏运行在云端服务器上，本地电脑只跑云电脑客户端 + AI 程序。云端和本地天生隔离，<span class="highlight">反作弊扫描不到本地 AI 程序</span>，等同于一套零硬件成本的「软件双机方案」。</p>
             <dl class="param-list">
                 <dt>原理</dt>
-                <dd>直接调用 Windows 的桌面复制接口（Desktop Duplication API），从当前显示器抓取画面。</dd>
+                <dd>登录顺网 / 海马等云电脑客户端，游戏在云端服务器内运行；本地 AI 程序使用 <code>winrt</code> 或 <code>duplication_api</code> 抓取云电脑客户端窗口画面，进行目标检测后，由本地鼠标 / 硬件盒子完成控制。</dd>
                 <dt>配置</dt>
-                <dd><code>capture_method</code> 设置为 <code>duplication_api</code>。</dd>
+                <dd><code>capture_method</code> 设置为 <code>winrt</code>（推荐，按窗口采集，不受遮挡影响）或 <code>duplication_api</code>。</dd>
                 <dt>优点</dt>
-                <dd>无需额外硬件，延迟极低，适配性最广。</dd>
-            </dl>
-
-            <!-- 2) WinRT -->
-            <div class="param-group">
-                <span class="group-tag">本机</span> WinRT 窗口 / 显示器采集
-                <span class="section-pill">单机 · 按窗口</span>
-                <span class="section-pill section-pill--warn section-pill--risk">高风险 · 仅靶场</span>
-            </div>
-            <p>面向 Win10/11 的现代采集接口，可以只抓特定游戏窗口，不受其它窗口遮挡影响。</p>
-            <dl class="param-list">
-                <dt>原理</dt>
-                <dd>使用 Windows Graphics Capture 接口，可按窗口或按显示器定向采集，支持游戏全屏 / 窗口化，遮挡被忽略。</dd>
-                <dt>配置</dt>
-                <dd><code>capture_method</code> 设置为 <code>winrt</code>，再在「采集目标」里选「显示器」或「窗口」。</dd>
-                <dt>适用</dt>
-                <dd>希望只抓特定游戏窗口、或本机采集但对 Duplication 兼容性不佳时。</dd>
-            </dl>
-
-            <!-- 3) NDI -->
-            <div class="param-group">
-                <span class="group-tag">网络</span> NDI 网络采集
-                <span class="section-pill">网络流 · 双机/手机</span>
-            </div>
-            <p>从局域网内的 NDI 源（OBS、手机、副机）接收画面，AI 机不直接抓桌面，规避部分桌面级检测。</p>
-            <dl class="param-list">
-                <dt>原理</dt>
-                <dd>从 OBS NDI、Android NDI Sender 或其它 NDI 源接收视频流，AI 机不需要直接抓桌面或窗口。</dd>
-                <dt>配置</dt>
-                <dd><code>capture_method</code> 设置为 <code>ndi_capture</code>，在「采集」页选择 NDI 源；也可以手动填写 <code>ndi_source_name</code> / <code>ndi_source_address</code>。</dd>
-                <dt>适用</dt>
-                <dd>已有 OBS / NDI 推流链路、手机或副机能稳定输出 NDI，且局域网质量较好时。</dd>
-                <dt>双机局域网快速教程</dt>
+                <dd>零硬件成本、新手即开即用；游戏与 AI 物理隔离，反作弊无感；云端配置高，老电脑也能畅玩 3A。</dd>
+                <dt>缺点</dt>
+                <dd>延迟略高于本地（≈10–30ms 增量），<strong>对家庭网络稳定性敏感</strong>，建议有线网或 5GHz Wi-Fi。</dd>
+                <dt>快速教程</dt>
                 <dd>
                     <ul>
-                        <li><strong>准备网络</strong>：主机（画面来源电脑）和 AI 机（运行本程序的电脑）接入同一个局域网，优先使用有线网；Windows 网络类型建议设为「专用网络」。</li>
-                        <li><strong>下载工具</strong>：到 NDI 官方下载 <a href="https://ndi.video/tools/" target="_blank" rel="noopener">NDI Tools</a>。主机至少需要 <strong>NDI Screen Capture</strong> 用来发送桌面 / 游戏画面；AI 机建议安装 <strong>NDI Studio Monitor</strong> 先测试能否看到主机画面。</li>
-                        <li><strong>主机设置</strong>：在主机启动 <strong>NDI Screen Capture</strong>，允许防火墙访问局域网；如果有多块网卡，优先保留当前和 AI 机互通的网卡。</li>
-                        <li><strong>AI 机测试</strong>：在 AI 机打开 <strong>NDI Studio Monitor</strong>，菜单里应能看到主机发出的 NDI 源；能正常预览后，再进入本程序选择 <code>ndi_capture</code>。</li>
-                        <li><strong>程序设置</strong>：在「采集」页选择 NDI 源；如果列表为空，可以把源名称填到 <code>ndi_source_name</code>，或把主机局域网 IP 填到 <code>ndi_source_address</code> 辅助连接。</li>
+                        <li><strong>选平台</strong>：从下方两个云电脑平台任选（推荐有 FPS 类游戏需求选海马，碎片时长 / 网吧场景选顺网）。</li>
+                        <li><strong>注册并启动</strong>：扫码登录后选择目标游戏，进入云电脑桌面，建议把客户端调到<strong>窗口化或最大化非全屏</strong>。</li>
+                        <li><strong>程序设置</strong>：本程序「采集」页把 <code>capture_method</code> 切到 <code>winrt</code>，「采集目标」里选中云电脑客户端窗口。</li>
+                        <li><strong>调检测分辨率</strong>：建议 <code>416</code> 或 <code>640</code> 起步；网络抖动时适度降低。</li>
+                        <li><strong>开始体验</strong>：进入游戏，按 HOME 键调出菜单微调灵敏度即可。</li>
                     </ul>
                 </dd>
-                <dt>注意</dt>
-                <dd>NDI 依赖局域网发现和防火墙放行；源不出现时先检查两台机器是否同网段、主机 Screen Capture 是否正在运行、Windows 防火墙是否允许 NDI、AI 机是否能用 Studio Monitor 看到画面。</dd>
             </dl>
 
-            <!-- 4) scrcpy -->
-            <div class="param-group">
-                <span class="group-tag">手机</span> scrcpy 手机画面采集
-                <span class="section-pill">Android · USB</span>
+            <!-- 推广：两个云电脑平台 -->
+            <div class="cloud-promo-grid">
+                <div class="cloud-promo-card">
+                    <div class="cloud-promo-card__head">
+                        <h4 class="cloud-promo-card__title">顺网云电脑</h4>
+                        <span class="cloud-promo-card__tag">灵活计费</span>
+                    </div>
+                    <p class="cloud-promo-card__desc">微信即注册即用，按分钟 / 小时计费，碎片化时间友好。</p>
+                    <ul class="cloud-promo-card__points">
+                        <li>按分钟 / 小时计费，灵活适配短时使用</li>
+                        <li>网吧、电竞酒店成熟方案，账号通用</li>
+                        <li>千款热门游戏预装，免下载即点即玩</li>
+                    </ul>
+                    <div class="cloud-promo-card__invite">邀请码：<code>wxz9xb</code></div>
+                    <a class="cloud-promo-card__cta" href="https://cpc.icloud.cn/cloudstatic/inviteReward?showUserId=18823334&inviteNo=wxz9xb&inviteScene=5" target="_blank" rel="noopener">
+                        立即注册领免费时长
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </a>
+                </div>
+
+                <div class="cloud-promo-card">
+                    <div class="cloud-promo-card__head">
+                        <h4 class="cloud-promo-card__title">海马云电脑</h4>
+                        <span class="cloud-promo-card__tag">极致画质</span>
+                    </div>
+                    <p class="cloud-promo-card__desc">独享物理显卡，FPS 类游戏延迟更低、性价比更高。</p>
+                    <ul class="cloud-promo-card__points">
+                        <li>独享物理显卡 + 顶级 CPU，最高 8K / 360Hz</li>
+                        <li>边缘节点部署，操作延迟接近本地</li>
+                        <li>约 0.66 元 / 小时，500TB 游戏库即点即玩</li>
+                    </ul>
+                    <div class="cloud-promo-card__invite">邀请码：<code>07f77a</code></div>
+                    <a class="cloud-promo-card__cta" href="https://pc.haimacloud.com/promotion?invite=07f77a" target="_blank" rel="noopener">
+                        立即注册领免费时长
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </a>
+                </div>
             </div>
-            <p>把 Android 手机画面通过 USB 调试拉到 PC，再交给 AI 推理，专门服务手游 / 模拟器之外的真机场景。</p>
+            <p class="cloud-promo-disclaimer">* 上述链接含本站邀请码，注册后双方均可获得免费时长。</p>
+
+            <!-- 2) 虚拟相机 / 采集卡 -->
+            <div class="param-group">
+                <span class="group-tag">双机</span> 虚拟相机 / 采集卡（物理隔离流派）
+                <span class="section-pill section-pill--recommended">最推荐 · 物理隔离</span>
+            </div>
+            <p>把游戏机画面通过 HDMI 采集卡送进 AI 机，<span class="highlight">最大程度规避反作弊对采集行为的检测</span>，是目前最安全、最稳定的硬件方案。</p>
             <dl class="param-list">
                 <dt>原理</dt>
-                <dd>通过 USB 调试启动 / 连接 scrcpy，把 Android 手机画面作为采集源，再按检测分辨率居中裁切给 AI 推理。</dd>
-                <dt>配置</dt>
-                <dd><code>capture_method</code> 设置为 <code>scrcpy_capture</code>，填写 scrcpy 路径；多设备时再指定 <code>scrcpy_device_serial</code>。</dd>
-                <dt>适用</dt>
-                <dd>手机画面采集、手机游戏画面预览、需要把推理输入固定到 <code>256×256</code> / <code>416×416</code> 等小尺寸时。</dd>
-                <dt>手机 USB 快速教程</dt>
+                <dd>把游戏机画面通过 HDMI 采集卡送进 AI 机，程序以系统层面的视频捕获设备（Media Foundation）直接读取画面；也可用于读取 OBS 虚拟摄像头、直播软件输出等任何注册为视频设备的来源。</dd>
+                <dt>硬件连接</dt>
+                <dd><code>游戏机 HDMI 输出</code> ➔ <code>HDMI 一分二（或带环出的采集卡）</code> ➔ <code>采集卡 USB</code> ➔ <code>AI 机</code>。</dd>
+                <dt>软件配置</dt>
                 <dd>
                     <ul>
-                        <li><strong>准备 scrcpy</strong>：优先从 QQ 社群「群文件」下载提供的 scrcpy 压缩包，解压后把整个 <code>scrcpy</code> 文件夹放到本程序同目录；也可以从 <a href="https://github.com/Genymobile/scrcpy/releases" target="_blank" rel="noopener">scrcpy 官方 Releases</a> 下载 Windows 包。</li>
-                        <li><strong>手机准备</strong>：Android 手机打开「开发者选项」和「USB 调试」，用 USB 数据线连接电脑；手机弹出授权时选择允许。</li>
-                        <li><strong>先测试连接</strong>：双击运行 <code>scrcpy.exe</code>，能看到手机画面就说明 USB 调试和 adb 通道正常；看不到时先换数据线、重插 USB、重新授权。</li>
-                        <li><strong>软件设置</strong>：进入本程序「采集」页，把「采集方式」切到 <code>scrcpy_capture</code>，点击「自动查找」即可识别同目录下的 scrcpy；只有一台手机时「设备序列号」可以留空。</li>
-                        <li><strong>选择检测分辨率</strong>：推荐先用 <code>256</code> 或 <code>416</code>。程序会按该尺寸居中裁切手机画面给 AI 推理；切换检测分辨率后会自动重新拉起 scrcpy，让裁切参数生效。</li>
-                        <li><strong>调延迟 / 画质</strong>：默认参数通常够用。延迟高时可选「低延迟」预设或降低最大边长；画质差时再提高码率或使用「画质」预设。</li>
+                        <li>在菜单中将「采集方式」设置为 <strong>虚拟相机</strong>（<code>capture_method = virtual_camera</code>）。</li>
+                        <li>在「选择虚拟相机」下拉里找到你的采集卡名称并选中（列表可用「过滤」输入框快速筛选）。</li>
+                        <li><strong>宽高建议</strong>：通常设置为 <code>1920×1080</code> 或 <code>1280×720</code>，程序会自动在中心裁剪出 AI 运算区域。</li>
+                        <li><strong>编码格式</strong>：优先推荐 <code>NV12</code>；默认自动协商无需干预。帧率自己设定 240fps 即可。</li>
                     </ul>
                 </dd>
-                <dt>边界</dt>
-                <dd>当前主线只负责采集 / 预览 / 裁切，<strong>不提供 scrcpy 触控注入</strong>；手机端输入请继续使用你自己的映射软件、硬件盒子或其它外部方案。</dd>
             </dl>
 
-            <!-- 5) UDP -->
+            <!-- 3) UDP -->
             <div class="param-group">
                 <span class="group-tag">双机</span> UDP 异步采集（双机网络推流）
                 <span class="section-pill section-pill--warn">高风险 · 仅靶场</span>
@@ -2253,26 +2440,91 @@
                 </dd>
             </dl>
 
-            <!-- 6) 虚拟相机 / 采集卡 -->
+            <!-- 4) NDI -->
             <div class="param-group">
-                <span class="group-tag">双机</span> 虚拟相机 / 采集卡（物理隔离流派）
-                <span class="section-pill section-pill--recommended">最推荐 · 物理隔离</span>
+                <span class="group-tag">网络</span> NDI 网络采集
+                <span class="section-pill">网络流 · 双机/手机</span>
             </div>
-            <p>把游戏机画面通过 HDMI 采集卡送进 AI 机，<span class="highlight">最大程度规避反作弊对采集行为的检测</span>，是目前最安全、最稳定的方案。</p>
+            <p>从局域网内的 NDI 源（OBS、手机、副机）接收画面，AI 机不直接抓桌面，规避部分桌面级检测。</p>
             <dl class="param-list">
                 <dt>原理</dt>
-                <dd>把游戏机画面通过 HDMI 采集卡送进 AI 机，程序以系统层面的视频捕获设备（Media Foundation）直接读取画面；也可用于读取 OBS 虚拟摄像头、直播软件输出等任何注册为视频设备的来源。</dd>
-                <dt>硬件连接</dt>
-                <dd><code>游戏机 HDMI 输出</code> ➔ <code>HDMI 一分二（或带环出的采集卡）</code> ➔ <code>采集卡 USB</code> ➔ <code>AI 机</code>。</dd>
-                <dt>软件配置</dt>
+                <dd>从 OBS NDI、Android NDI Sender 或其它 NDI 源接收视频流，AI 机不需要直接抓桌面或窗口。</dd>
+                <dt>配置</dt>
+                <dd><code>capture_method</code> 设置为 <code>ndi_capture</code>，在「采集」页选择 NDI 源；也可以手动填写 <code>ndi_source_name</code> / <code>ndi_source_address</code>。</dd>
+                <dt>适用</dt>
+                <dd>已有 OBS / NDI 推流链路、手机或副机能稳定输出 NDI，且局域网质量较好时。</dd>
+                <dt>双机局域网快速教程</dt>
                 <dd>
                     <ul>
-                        <li>在菜单中将「采集方式」设置为 <strong>虚拟相机</strong>（<code>capture_method = virtual_camera</code>）。</li>
-                        <li>在「选择虚拟相机」下拉里找到你的采集卡名称并选中（列表可用「过滤」输入框快速筛选）。</li>
-                        <li><strong>宽高建议</strong>：通常设置为 <code>1920×1080</code> 或 <code>1280×720</code>，程序会自动在中心裁剪出 AI 运算区域。</li>
-                        <li><strong>编码格式</strong>：优先推荐 <code>NV12</code>；默认自动协商无需干预。帧率自己设定 240fps 即可。</li>
+                        <li><strong>准备网络</strong>：主机（画面来源电脑）和 AI 机（运行本程序的电脑）接入同一个局域网，优先使用有线网；Windows 网络类型建议设为「专用网络」。</li>
+                        <li><strong>下载工具</strong>：到 NDI 官方下载 <a href="https://ndi.video/tools/" target="_blank" rel="noopener">NDI Tools</a>。主机至少需要 <strong>NDI Screen Capture</strong> 用来发送桌面 / 游戏画面；AI 机建议安装 <strong>NDI Studio Monitor</strong> 先测试能否看到主机画面。</li>
+                        <li><strong>主机设置</strong>：在主机启动 <strong>NDI Screen Capture</strong>，允许防火墙访问局域网；如果有多块网卡，优先保留当前和 AI 机互通的网卡。</li>
+                        <li><strong>AI 机测试</strong>：在 AI 机打开 <strong>NDI Studio Monitor</strong>，菜单里应能看到主机发出的 NDI 源；能正常预览后，再进入本程序选择 <code>ndi_capture</code>。</li>
+                        <li><strong>程序设置</strong>：在「采集」页选择 NDI 源；如果列表为空，可以把源名称填到 <code>ndi_source_name</code>，或把主机局域网 IP 填到 <code>ndi_source_address</code> 辅助连接。</li>
                     </ul>
                 </dd>
+                <dt>注意</dt>
+                <dd>NDI 依赖局域网发现和防火墙放行；源不出现时先检查两台机器是否同网段、主机 Screen Capture 是否正在运行、Windows 防火墙是否允许 NDI、AI 机是否能用 Studio Monitor 看到画面。</dd>
+            </dl>
+
+            <!-- 5) scrcpy -->
+            <div class="param-group">
+                <span class="group-tag">手机</span> scrcpy 手机画面采集
+                <span class="section-pill">Android · USB</span>
+            </div>
+            <p>把 Android 手机画面通过 USB 调试拉到 PC，再交给 AI 推理，专门服务手游 / 模拟器之外的真机场景。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>通过 USB 调试启动 / 连接 scrcpy，把 Android 手机画面作为采集源，再按检测分辨率居中裁切给 AI 推理。</dd>
+                <dt>配置</dt>
+                <dd><code>capture_method</code> 设置为 <code>scrcpy_capture</code>，填写 scrcpy 路径；多设备时再指定 <code>scrcpy_device_serial</code>。</dd>
+                <dt>适用</dt>
+                <dd>手机画面采集、手机游戏画面预览、需要把推理输入固定到 <code>256×256</code> / <code>416×416</code> 等小尺寸时。</dd>
+                <dt>手机 USB 快速教程</dt>
+                <dd>
+                    <ul>
+                        <li><strong>准备 scrcpy</strong>：优先从 QQ 社群「群文件」下载提供的 scrcpy 压缩包，解压后把整个 <code>scrcpy</code> 文件夹放到本程序同目录；也可以从 <a href="https://github.com/Genymobile/scrcpy/releases" target="_blank" rel="noopener">scrcpy 官方 Releases</a> 下载 Windows 包。</li>
+                        <li><strong>手机准备</strong>：Android 手机打开「开发者选项」和「USB 调试」，用 USB 数据线连接电脑；手机弹出授权时选择允许。</li>
+                        <li><strong>先测试连接</strong>：双击运行 <code>scrcpy.exe</code>，能看到手机画面就说明 USB 调试和 adb 通道正常；看不到时先换数据线、重插 USB、重新授权。</li>
+                        <li><strong>软件设置</strong>：进入本程序「采集」页，把「采集方式」切到 <code>scrcpy_capture</code>，点击「自动查找」即可识别同目录下的 scrcpy；只有一台手机时「设备序列号」可以留空。</li>
+                        <li><strong>选择检测分辨率</strong>：推荐先用 <code>256</code> 或 <code>416</code>。程序会按该尺寸居中裁切手机画面给 AI 推理；切换检测分辨率后会自动重新拉起 scrcpy，让裁切参数生效。</li>
+                        <li><strong>调延迟 / 画质</strong>：默认参数通常够用。延迟高时可选「低延迟」预设或降低最大边长；画质差时再提高码率或使用「画质」预设。</li>
+                    </ul>
+                </dd>
+                <dt>边界</dt>
+                <dd>当前主线只负责采集 / 预览 / 裁切，<strong>不提供 scrcpy 触控注入</strong>；手机端输入请继续使用你自己的映射软件、硬件盒子或其它外部方案。</dd>
+            </dl>
+
+            <!-- 6) WinRT -->
+            <div class="param-group">
+                <span class="group-tag">本机</span> WinRT 窗口 / 显示器采集
+                <span class="section-pill">单机 · 按窗口</span>
+                <span class="section-pill section-pill--warn section-pill--risk">高风险 · 仅靶场</span>
+            </div>
+            <p>面向 Win10/11 的现代采集接口，可以只抓特定游戏窗口，不受其它窗口遮挡影响。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>使用 Windows Graphics Capture 接口，可按窗口或按显示器定向采集，支持游戏全屏 / 窗口化，遮挡被忽略。</dd>
+                <dt>配置</dt>
+                <dd><code>capture_method</code> 设置为 <code>winrt</code>，再在「采集目标」里选「显示器」或「窗口」。</dd>
+                <dt>适用</dt>
+                <dd>希望只抓特定游戏窗口、或本机采集但对 Duplication 兼容性不佳时。<strong>云游戏场景也建议用此方式抓客户端窗口</strong>。</dd>
+            </dl>
+
+            <!-- 7) Duplication API -->
+            <div class="param-group">
+                <span class="group-tag">本机</span> 常规本机采集 (Duplication API)
+                <span class="section-pill">单机 · 零配置</span>
+                <span class="section-pill section-pill--warn section-pill--risk">高风险 · 仅靶场</span>
+            </div>
+            <p>最朴素的本机采集方式，无需任何额外软硬件，开箱即用。</p>
+            <dl class="param-list">
+                <dt>原理</dt>
+                <dd>直接调用 Windows 的桌面复制接口（Desktop Duplication API），从当前显示器抓取画面。</dd>
+                <dt>配置</dt>
+                <dd><code>capture_method</code> 设置为 <code>duplication_api</code>。</dd>
+                <dt>优点</dt>
+                <dd>无需额外硬件，延迟极低，适配性最广。</dd>
             </dl>
 
             <h3>3. 如何运行</h3>
