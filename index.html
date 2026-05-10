@@ -2532,10 +2532,16 @@
                 <li><strong>下载并解压</strong> 对应版本的压缩包。</li>
                 <li>对于 <strong>CUDA + TensorRT 版本</strong>，请直接解压我们提供的完整运行包 <code>trt env.ZIP</code>，再将 <code>trt ai.exe</code> 放入其中。</li>
                 <li>对于 <strong>DML 版本</strong>，无需额外软件设置。</li>
-                <li><strong>运行对应程序</strong>：DML 版本运行 <code>ai.exe</code>，CUDA + TensorRT 版本运行 <code>trt ai.exe</code>。
+                <li><strong>运行对应程序</strong>：DML 版本运行 <code>ai.exe</code>，CUDA + TensorRT 版本运行 <code>trt ai.exe</code>。</li>
+                <li><strong>完成授权登录</strong>：启动后会先进入内置卡密验证窗口；输入卡密后点击登录即可。需要先体验的用户可使用窗口内的一键试用入口。
                     <ul>
-                        <li><em>首次运行</em>：程序会自动导出模型优化，可能需要 1-5 分钟，请耐心等待。</li>
-                            等），程序在启动时会立刻弹出清晰的报错提示框，不再存在“双击没反应”的静默闪退情况。</li>
+                        <li>授权通过后程序会自动进入主界面，后续会保存授权状态，减少重复操作。</li>
+                        <li>如果网络验证失败，请先检查网络、系统时间与防火墙拦截。</li>
+                    </ul>
+                </li>
+                <li><strong>首次运行等待模型优化</strong>：程序会自动导出模型优化，可能需要 1-5 分钟，请耐心等待。
+                    <ul>
+                        <li>如果缺少运行库、模型文件或必要依赖，程序会弹出清晰的报错提示框，不再是“双击没反应”。</li>
                     </ul>
                 </li>
                 <li><strong>放置模型</strong>：将你的 <code>.onnx</code> 模型文件放到解压目录下的 <code>models</code> 文件夹中。</li>
@@ -2636,7 +2642,7 @@
                         </ul>
                     </dd>
 
-                    <dt>启用动态范围 (Dynamic FOV) <span class="section-pill">v2.1.3 新增</span></dt>
+                    <dt>启用动态范围 (Dynamic FOV)</dt>
                     <dd>锁定目标时瞄准范围会<strong>平滑收缩</strong>到「最小范围」，丢失目标后再平滑张开。极大减少锁定过程中被新出现的敌人「切锁」干扰。全视野时该选项禁用。</dd>
 
                     <dt>最小范围 / 收缩时长 / 恢复时长</dt>
@@ -2688,6 +2694,15 @@
                             <li>拉枪偏慢 / 跟不上移动目标 → 调大最大速度倍率。</li>
                             <li>远距离拉枪像瞬移 / 一拉就过头 → 调小最大速度倍率。</li>
                         </ul>
+                    </dd>
+
+                    <dt>启用 PID 增强 (pid_enabled)</dt>
+                    <dd>位于核心移动的速度区下方。建议先调好基础灵敏度、FOV 和速度倍率，再开启 PID，用来减少移动目标上的稳态误差。</dd>
+
+                    <dt>积分系数 (Ki 比例) / 微分系数 (Kd 比例)</dt>
+                    <dd>
+                        <strong>Ki</strong> 用来补偿「总是差一点追不上」的落后感；<strong>Kd</strong> 用来给 Ki 加刹车，减少左右甩过头。
+                        <br>建议 Ki 从 <code>0.01</code> 小步上调，出现钟摆式晃动时再少量加入 Kd。
                     </dd>
                 </dl>
 
@@ -2755,24 +2770,6 @@
                     <dd>配合上一项，数值越小越平滑但越有拖影。建议范围 <code>0.4 ~ 0.8</code>。</dd>
                 </dl>
 
-                <div class="param-group"><span class="group-tag">PID</span> PID 增强</div>
-                <dl class="param-list">
-                    <dt>启用 PID 增强 (pid_enabled)</dt>
-                    <dd>在原有的距离分层基础上加入积分 (I) 与微分 (D) 两项修正。适合跟移动目标时使用。</dd>
-
-                    <dt>积分系数 (Ki 比例)</dt>
-                    <dd>
-                        解决「稳态误差」。比如平滑开得高，准星永远差几个像素追不上。Ki 让 AI 意识到「我已经落后很久了，该加速填补这段差距」。
-                        <br>建议先从 <code>0.05</code> 试起，逐步升到 <code>0.1</code>。
-                    </dd>
-
-                    <dt>微分系数 (Kd 比例)</dt>
-                    <dd>
-                        阻尼刹车，防止 Ki 过大导致「超调」（钟摆式左右甩过头）。
-                        <br>建议在 <code>0.001 ~ 0.005</code>，仅当出现摇晃时再开。
-                    </dd>
-                </dl>
-
                 <h3>轨迹曲线与微扰 (Bezier &amp; Wind)</h3>
                 <p>让拉枪路径看起来像人类操作，<strong>粉碎反作弊对鼠标运动平滑度 / 直线度的异常统计</strong>。</p>
                 <dl class="param-list">
@@ -2797,8 +2794,8 @@
 
                 <h3>轨迹预测 (Prediction)</h3>
                 <p>
-                    打移动靶的核心机制。<strong>底层全部走动态 Alpha-Beta 预测链路</strong>，自动按目标速度/加速度调节，追踪锁敌更精准丝滑。
-                    系统使用公式 <code>基础预测间隔 + 实时推理延迟</code> 计算提前量，彻底解决「吃尾气慢半拍」的问题。
+                    打移动靶的核心机制。当前版本重点提升了高速横移、突然反向、短暂丢检时的稳定性，
+                    让预测更多服务于锁定连续性和调试分析，真实鼠标输出更少过冲、更少抖动。
                 </p>
                 <dl class="param-list">
                     <dt>启用轨迹预测 (trajectory_prediction_enabled)</dt>
@@ -3123,7 +3120,7 @@
                     <dd>通常 <code>1920×1080</code> 或 <code>1280×720</code>，程序自动按比例在中心裁剪出 AI 运算区域。</dd>
 
                     <dt>编码格式</dt>
-                    <dd>默认自动协商，<code>NV12</code> 延迟最低优先选用；<code>YUY2</code> 作为备选；<code>MJPG</code> 是最后兜底。<strong>本程序对采集卡流走 CPU 解码</strong>，高帧率 + 高分辨率下 CPU 可能成为瓶颈，手动切到 <code>MJPG</code> 也未必能跑满目标帧率，此时请看下方 OBS 中转方案。</dd>
+                    <dd>默认自动协商，<code>NV12</code> 延迟最低优先选用；<code>YUY2</code> 作为备选；<code>MJPG</code> 是最后兜底。3.0.0 已优化 DirectShow / 虚拟相机高帧率处理，建议优先直连采集卡测试 120 / 144 / 165 / 240fps 档位。</dd>
 
                     <dt>采集帧率</dt>
                     <dd>跟随全局 / 固定 30 / 60 / 120 / 144 / 165 / 240 / 360。与采集卡硬件支持的档位匹配即可。</dd>
@@ -3133,8 +3130,8 @@
                         <svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
                     </div>
                     <div class="callout-content">
-                        <span class="callout-title">采集卡跑不满帧？改用 OBS 虚拟摄像头中转</span>
-                        <p>由于本程序对采集卡流采用 CPU 解码，在 <code>1080p/240Hz</code> 这类高吞吐场景下 CPU 解码会先顶死，<strong>即便切到 <code>MJPG</code> 也无法稳定跑满目标帧率</strong>。推荐做法：在 <strong>AI 推理机</strong>安装 <strong>OBS Studio</strong>，让 OBS 接管采集卡画面（OBS 会用 GPU 做解码与缩放），然后在 OBS 里启动「虚拟摄像头」功能。回到本程序的「选择虚拟相机」下拉里，挑选 <code>OBS Virtual Camera</code>（软件界面为英文，名字就是这个），就能把 OBS 已解码好的帧直接喂给推理线程，稳稳跑满采集卡档位。</p>
+                        <span class="callout-title">240fps 优先直连，OBS 作为备用中转</span>
+                        <p>当前版本已经针对采集卡高帧率链路做了优化。推荐先让程序直接选择采集卡，编码保持自动或 <code>NV12</code>，帧率设为 <code>240</code> 后观察实际 FPS。若你的设备驱动、USB 带宽或系统解码链路仍然跑不满，再在 <strong>AI 推理机</strong>安装 <strong>OBS Studio</strong>，由 OBS 接管采集卡画面并开启 <code>OBS Virtual Camera</code>，把已处理好的画面交给本程序。</p>
                     </div>
                 </div>
 
@@ -3460,7 +3457,7 @@
                 <li>用【核心移动】面板内的 <strong>FOV 查询工具</strong>（下拉列表）快速获取当前游戏的 <code>FOV X / FOV Y</code> 数值并填入。</li>
                 <li>设定 <strong>瞄准范围 (fov_radius)</strong>——以准星为中心的锁定半径（像素）。<code>0</code> = 全视野；推荐按「检测分辨率的 30% ~ 50%」起步。</li>
                 <li>
-                    <strong>（推荐）启用动态瞄准范围 <span class="section-pill">v2.1.3 新</span></strong>：锁定目标时瞄准范围会平滑收缩到「最小范围」，丢失目标后再张开，有效减少人多时被其它目标切锁的干扰。
+                    <strong>（推荐）启用动态瞄准范围</strong>：锁定目标时瞄准范围会平滑收缩到「最小范围」，丢失目标后再张开，有效减少人多时被其它目标切锁的干扰。
                     <ul>
                         <li>最小范围：建议 <code>25 ~ 50</code> 像素。</li>
                         <li>收缩时长：默认 <code>200 ms</code> 即可。</li>
@@ -3472,7 +3469,7 @@
             <h3><span class="step-num">03</span>基础跟枪手感打磨（关掉一切辅助，先裸调）</h3>
             <p>思路：先把所有平滑 / PID / 预测 / 曲线都关了，只靠「速度倍率 + 减速曲线」把最原始的拉枪手感打磨出来。</p>
             <ol>
-                <li>进入【鼠标 → 移动修正】面板，把 <strong>启用线性输出平滑 (move_ema_enabled)</strong> 取消勾选，<strong>启用 PID 增强 (pid_enabled)</strong> 取消勾选。</li>
+                <li>进入【鼠标 → 移动修正】面板，把 <strong>启用线性输出平滑 (move_ema_enabled)</strong> 取消勾选；再到【鼠标 → 核心移动】面板把 <strong>启用 PID 增强 (pid_enabled)</strong> 取消勾选。</li>
                 <li>进入【鼠标 → 轨迹预测】面板，把 <strong>预测间隔 (predictionInterval)</strong> 设为 <code>0</code>（关闭）。</li>
                 <li>
                     回到【核心移动】调 <strong>速度倍率</strong>：
@@ -3514,7 +3511,7 @@
             <p>静止目标已经稳了，但一旦对面横向移动你就追不上？这一步解决。</p>
             <ol>
                 <li>
-                    <strong>启用轨迹预测 + 选预设 <span class="section-pill">v2.1.0 起推荐</span></strong>：
+                    <strong>启用轨迹预测 + 选预设</strong>：
                     <ul>
                         <li>进【轨迹预测】面板，勾选 <strong>启用轨迹预测 (trajectory_prediction_enabled)</strong>。</li>
                         <li>【<strong>轨迹风格 (Trajectory Preset)</strong>】先选 <code>均衡 (balanced)</code>，这是大多数人最舒服的默认。爱追高速目标可换 <code>激进 (aggressive)</code>；容易被误检带偏就切 <code>稳定 (stable)</code>。</li>
@@ -3522,7 +3519,7 @@
                     </ul>
                 </li>
                 <li>
-                    <strong>解决稳态误差（总跟在屁股后面差一个身位）</strong>：勾选 <strong>启用 PID 增强 (pid_enabled)</strong>。
+                    <strong>解决稳态误差（总跟在屁股后面差一个身位）</strong>：进入【鼠标 → 核心移动】勾选 <strong>启用 PID 增强 (pid_enabled)</strong>。
                     <ul>
                         <li>先调 <strong>积分 Ki 比例 (pid_ki_factor)</strong>：从 <code>0.01</code> 起步，逐渐升到 <code>0.1</code>。开启后你会明显感觉准星「多用了一点力」去填平这段差距。</li>
                         <li>如果 Ki 调大后准星像钟摆一样左右甩过头，就加一点 <strong>微分 Kd 比例 (pid_kd_factor)</strong>（<code>0.001 ~ 0.005</code>）当刹车。</li>
@@ -3665,8 +3662,29 @@
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
                         <div class="timeline-header">
-                            <span class="timeline-version">v2.1.4</span>
+                            <span class="timeline-version">v3.0.0</span>
                             <span class="timeline-badge hot">Latest</span>
+                            <span class="timeline-title">瞄准算法、采集卡 240fps 与内置授权大更新</span>
+                        </div>
+                        <div class="timeline-body">
+                            <ul>
+                                <li><strong>瞄准算法增强</strong>：高速移动、突然变向、近距离停顿后的跟踪更稳，减少拖锁、过冲、收尾抖动和准星轴积分尾巴。</li>
+                                <li><strong>预测输出更稳</strong>：修复预测点污染瞄准状态、非观测帧直接输出鼠标移动等问题，真实鼠标输出更安全、更不容易抖。</li>
+                                <li><strong>核心移动优化</strong>：PID 增强已移到核心移动区，并加入近中心横向量化抑制，减少贴近目标时的细小反向跳动。</li>
+                                <li><strong>模型类别修复</strong>：修复 <code>v26 end2end</code> 模型类别数误判，支持无头部类别模型配置，减少锁错类别、锁道具、锁队友。</li>
+                                <li><strong>采集卡高帧率优化</strong>：优化 DirectShow / 虚拟相机采集链路，双机采集卡在 120 / 144 / 165 / 240fps 档位下更容易跑满。</li>
+                                <li><strong>内置卡密验证</strong>：加入卡密网络验证、授权保存、云验证版本字段修复和一键试用入口，启动授权流程更完整。</li>
+                                <li><strong>界面体验升级</strong>：授权登录窗重做视觉质感，支持拖动、入场动画、指纹品牌图标、天气组件；主窗口新增开场动画。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item important" data-category="update">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <span class="timeline-version">v2.1.4</span>
+                            <span class="timeline-badge hot">Update</span>
                             <span class="timeline-title">NDI 与 scrcpy 手机采集更新</span>
                         </div>
                         <div class="timeline-body">
