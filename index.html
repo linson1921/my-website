@@ -2938,8 +2938,27 @@
                     <dd>方向键被临时释放的时长（毫秒）。推荐 <code>60 ~ 80 ms</code>，过长角色会明显停顿暴露意图。</dd>
                 </dl>
 
-                <h3>自动背闪 (Auto Flash) <span class="section-pill">预留功能</span></h3>
-                <p>后续版本计划支持识别闪光弹类别并在爆闪前自动转身背对闪光源。<strong>当前版本仅占位，未开放。</strong></p>
+                <h3>自动背闪 (Auto Flash)</h3>
+                <p>识别指定闪光类别后，程序会先等待一小段执行延迟，再按曲线快速转身背对闪光源，并自动回正。它使用独立动作曲线，不进入普通瞄准 PID。</p>
+                <dl class="param-list">
+                    <dt>启用自动背闪</dt>
+                    <dd>总开关。默认关闭；首次使用需要先填写闪光类别 ID。</dd>
+
+                    <dt>闪光类别 ID</dt>
+                    <dd>填写模型里的闪光类别，多个类别用英文逗号分隔。例如 <code>4</code> 或 <code>4,5</code>。常见 <code>kenny_ultra</code> 模型的闪光类别通常是 <code>4</code>。</dd>
+
+                    <dt>闪光置信度</dt>
+                    <dd>背闪使用独立置信度，建议高于人物检测阈值，减少道具误识别导致的误触发。</dd>
+
+                    <dt>背闪距离</dt>
+                    <dd>控制转身幅度。不同游戏灵敏度、鼠标方式和盒子固件手感不同，建议用户主要调这个参数。</dd>
+
+                    <dt>执行延迟 / 转身时长 / 回正时长</dt>
+                    <dd>执行延迟模拟人的反应时间；转身时长控制背过去的速度；回正时长控制恢复视角的速度。一般不要盲目拉到极限，太机械反而不自然。</dd>
+
+                    <dt>冷却时间</dt>
+                    <dd>防止同一颗闪光在爆闪期间反复触发。</dd>
+                </dl>
             </div>
 
             <!-- ============================================== -->
@@ -3013,7 +3032,7 @@
                     <dd>开启后即使模型检测到头部类，也只会锁定身体框。<strong>反检测用途</strong>：部分游戏会对完美爆头率做统计。</dd>
 
                     <dt>自动瞄准 (auto_aim)</dt>
-                    <dd>总开关。关闭后即使按住瞄准键，AI 也不会产生鼠标移动（纯观察模式，方便调试）。</dd>
+                    <dd>总开关。关闭后即使按住瞄准键，AI 也不会产生鼠标移动（纯观察模式，方便调试）。开启后会复用「按钮 / 触发」里的类别勾选，只锁定被勾选的类别，避免默认全类别时锁到道具或无关目标。</dd>
 
                     <dt>类别映射 - 身体类 ID / 头部类 ID</dt>
                     <dd>
@@ -3662,8 +3681,26 @@
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
                         <div class="timeline-header">
-                            <span class="timeline-version">v3.0.0</span>
+                            <span class="timeline-version">v3.1.0</span>
                             <span class="timeline-badge hot">Latest</span>
+                            <span class="timeline-title">自动背闪与类别锁定更新</span>
+                        </div>
+                        <div class="timeline-body">
+                            <ul>
+                                <li><strong>新增自动背闪</strong>：支持识别指定闪光类别后自动背闪，包含独立置信度、执行延迟、背闪距离、转身 / 回正时长、冷却时间和中心随机方向处理。</li>
+                                <li><strong>拟人背闪曲线</strong>：背闪动作采用快速启动、平滑回正的独立曲线，不进入普通瞄准 PID，手感更接近人工反应。</li>
+                                <li><strong>自动瞄准类别复用</strong>：打开自动瞄准后复用「按钮 / 触发」里的类别勾选，只锁定已勾选类别，减少默认全类别时锁定道具、队友或无关目标。</li>
+                                <li><strong>采集卡日志收敛</strong>：DirectShow 设备枚举的冗余日志改为静默处理，避免普通使用时刷屏。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item important" data-category="major">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <span class="timeline-version">v3.0.0</span>
+                            <span class="timeline-badge hot">Major</span>
                             <span class="timeline-title">瞄准算法、采集卡 240fps 与内置授权大更新</span>
                         </div>
                         <div class="timeline-body">
