@@ -2702,7 +2702,7 @@
                     <dt>积分系数 (Ki 比例) / 微分系数 (Kd 比例)</dt>
                     <dd>
                         <strong>Ki</strong> 用来补偿「总是差一点追不上」的落后感；<strong>Kd</strong> 用来给 Ki 加刹车，减少左右甩过头。
-                        <br>建议 Ki 从 <code>0.01</code> 小步上调，出现钟摆式晃动时再少量加入 Kd。
+                        <br>采集卡常用档可以参考 <code>pid采集卡</code>：<code>Ki ≈ 0.28</code>、<code>Kd ≈ 0.002</code>；需要更强追踪时再参考 <code>pid强力采集卡</code>，把 <code>Ki</code> 提高到 <code>0.6 ~ 0.9</code>。如果准星开始左右甩过头，再把 <code>Kd</code> 小幅加到 <code>0.002 ~ 0.005</code>。
                     </dd>
                 </dl>
 
@@ -3540,8 +3540,8 @@
                 <li>
                     <strong>解决稳态误差（总跟在屁股后面差一个身位）</strong>：进入【鼠标 → 核心移动】勾选 <strong>启用 PID 增强 (pid_enabled)</strong>。
                     <ul>
-                        <li>先调 <strong>积分 Ki 比例 (pid_ki_factor)</strong>：从 <code>0.01</code> 起步，逐渐升到 <code>0.1</code>。开启后你会明显感觉准星「多用了一点力」去填平这段差距。</li>
-                        <li>如果 Ki 调大后准星像钟摆一样左右甩过头，就加一点 <strong>微分 Kd 比例 (pid_kd_factor)</strong>（<code>0.001 ~ 0.005</code>）当刹车。</li>
+                        <li>先调 <strong>积分 Ki 比例 (pid_ki_factor)</strong>：采集卡常用跟枪可以从 <code>0.20 ~ 0.30</code> 起步，接近 <code>pid采集卡</code> 的手感；如果仍然明显落后，再逐步提高到 <code>0.60 ~ 0.90</code>，接近 <code>pid强力采集卡</code>。</li>
+                        <li><strong>微分 Kd 比例 (pid_kd_factor)</strong> 先保持很小，例如 <code>0.001 ~ 0.002</code>。如果 Ki 调大后准星像钟摆一样左右甩过头，再加到 <code>0.003 ~ 0.005</code> 当刹车。</li>
                     </ul>
                 </li>
             </ol>
