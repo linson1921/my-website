@@ -995,6 +995,163 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
+        .download-card {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: center;
+            margin: 0 0 26px;
+            padding: 18px 20px;
+            border: 1px solid rgba(49, 130, 206, 0.2);
+            border-radius: var(--radius-md);
+            background:
+                linear-gradient(135deg, rgba(235, 248, 255, 0.78), rgba(236, 253, 245, 0.62)),
+                var(--color-surface);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .download-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--color-primary-400), var(--color-accent-400));
+            opacity: 0.9;
+        }
+
+        [data-theme="dark"] .download-card {
+            background:
+                linear-gradient(135deg, rgba(30, 58, 138, 0.28), rgba(6, 95, 70, 0.22)),
+                var(--color-surface-raised);
+            border-color: rgba(96, 165, 250, 0.24);
+        }
+
+        .download-card__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 7px;
+            color: var(--color-primary-600);
+            font-size: 0.78em;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        [data-theme="dark"] .download-card__eyebrow {
+            color: var(--color-primary-200);
+        }
+
+        .download-card__title {
+            margin: 0;
+            color: var(--color-text);
+            font-size: 1.24em;
+            line-height: 1.25;
+        }
+
+        .download-card__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 0;
+        }
+
+        .download-card__chip {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            padding: 0 10px;
+            border-radius: var(--radius-pill);
+            color: var(--color-text-soft);
+            background: rgba(255, 255, 255, 0.58);
+            border: 1px solid rgba(49, 130, 206, 0.18);
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        [data-theme="dark"] .download-card__chip {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(96, 165, 250, 0.2);
+        }
+
+        .download-card__actions {
+            display: grid;
+            gap: 10px;
+            justify-items: end;
+            min-width: 226px;
+        }
+
+        .download-card__btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            width: 100%;
+            min-height: 44px;
+            padding: 0 16px;
+            border: none;
+            border-radius: var(--radius-pill);
+            color: #fff;
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+            box-shadow: 0 12px 24px rgba(49, 130, 206, 0.26);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.92em;
+            font-weight: 800;
+            letter-spacing: 0;
+            transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), opacity 0.2s var(--ease-out);
+        }
+
+        .download-card__btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(49, 130, 206, 0.32);
+        }
+
+        .download-card__btn:disabled {
+            cursor: wait;
+            opacity: 0.78;
+        }
+
+        .download-card__btn svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2.2;
+            flex: 0 0 auto;
+        }
+
+        .download-card__progress {
+            width: 100%;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(49, 130, 206, 0.16);
+            overflow: hidden;
+        }
+
+        .download-card__bar {
+            display: block;
+            width: 0%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--color-primary-400), var(--color-accent-400));
+            transition: width 0.2s var(--ease-out);
+        }
+
+        .download-card__status {
+            min-height: 18px;
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.78em;
+            text-align: right;
+        }
+
         /* =========================================== */
         /*  Sub Tabs (菜单导航栏 · 对应软件菜单)         */
         /* =========================================== */
@@ -1071,6 +1228,21 @@
                 min-width: unset;
                 font-size: 0.84em;
                 padding: 7px 12px;
+            }
+
+            .download-card {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                padding: 16px;
+            }
+
+            .download-card__actions {
+                justify-items: stretch;
+                min-width: 0;
+            }
+
+            .download-card__status {
+                text-align: left;
             }
         }
 
@@ -1295,6 +1467,696 @@
         .sandbox-btn:hover {
             box-shadow: 0 6px 16px rgba(49, 130, 206, 0.4);
             transform: translateY(-1px);
+        }
+
+        .sunset-cruise-launch {
+            display: flex;
+            justify-content: center;
+            margin: 34px 0 0;
+        }
+
+        .sunset-cruise-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 48px;
+            padding: 0 22px;
+            border: 1px solid rgba(255, 178, 92, 0.48);
+            border-radius: var(--radius-pill);
+            color: #fff5dc;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(255, 210, 122, 0.42), transparent 34%),
+                linear-gradient(135deg, #2a1535 0%, #8f3651 52%, #ff8a3d 100%);
+            box-shadow: 0 12px 34px rgba(184, 72, 79, 0.28), inset 0 1px 0 rgba(255,255,255,0.18);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.96em;
+            font-weight: 800;
+            letter-spacing: 0;
+            overflow: hidden;
+            transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+        }
+
+        .sunset-cruise-btn::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(110deg, transparent 0 28%, rgba(255,255,255,0.48) 45%, transparent 62% 100%);
+            opacity: 0;
+            transform: translateX(-62%);
+            transition: opacity 0.25s var(--ease-out), transform 0.55s var(--ease-out);
+        }
+
+        .sunset-cruise-btn:hover {
+            border-color: rgba(255, 210, 122, 0.76);
+            box-shadow: 0 16px 46px rgba(184, 72, 79, 0.34), 0 0 28px rgba(255, 178, 92, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .sunset-cruise-btn:hover::before {
+            opacity: 1;
+            transform: translateX(68%);
+        }
+
+        .sunset-cruise-icon,
+        .sunset-cruise-label {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sunset-cruise-icon {
+            color: #ffe7a8;
+            font-size: 1.08em;
+            text-shadow: 0 0 16px rgba(255, 210, 122, 0.72);
+        }
+
+        .sunset-cruise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            background: #09091a;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.34s var(--ease-out);
+        }
+
+        .sunset-cruise-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sunset-cruise-stage {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #09091a;
+            color: #fff3d0;
+            isolation: isolate;
+        }
+
+        .sunset-cruise-bg {
+            position: absolute;
+            inset: -4vh -4vw;
+            background-image: url("assets/sunset-road.jpg");
+            background-size: cover;
+            background-position: 50% 52%;
+            filter: saturate(1.12) contrast(1.04) brightness(0.86);
+            transform: scale(1.06);
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-bg {
+            animation: sunset-cruise-push 12s cubic-bezier(.45,0,.55,1) infinite;
+        }
+
+        .sunset-cruise-grade,
+        .sunset-cruise-vignette,
+        .sunset-cruise-particles,
+        .sunset-cruise-hud,
+        .sunset-cruise-panels,
+        .sunset-cruise-title {
+            position: absolute;
+            inset: 0;
+        }
+
+        .sunset-cruise-grade {
+            z-index: 1;
+            background:
+                radial-gradient(circle at 71% 21%, rgba(255, 197, 94, 0.24), transparent 24%),
+                radial-gradient(circle at 42% 72%, rgba(86, 232, 255, 0.09), transparent 34%),
+                linear-gradient(180deg, rgba(9, 7, 31, 0.28) 0%, rgba(9, 7, 31, 0.04) 38%, rgba(9, 7, 31, 0.18) 68%, rgba(9, 7, 31, 0.72) 100%);
+        }
+
+        .sunset-cruise-particles {
+            z-index: 2;
+            opacity: 0.55;
+            background-image:
+                radial-gradient(circle, rgba(255,241,200,.32) 0 1px, transparent 1.5px),
+                radial-gradient(circle, rgba(255,241,200,.2) 0 1px, transparent 1.5px);
+            background-size: 180px 180px, 260px 220px;
+            background-position: 30px 40px, 120px 90px;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-particles {
+            animation: sunset-cruise-dust 12s linear infinite;
+        }
+
+        .sunset-cruise-hud {
+            z-index: 3;
+        }
+
+        .sunset-cruise-hud svg,
+        .sunset-cruise-wire {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .sunset-cruise-route {
+            fill: none;
+            stroke: url(#sunsetCruiseAimPath);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 16 18;
+            stroke-dashoffset: 0;
+            filter: drop-shadow(0 0 8px rgba(86,232,255,.72));
+            opacity: 0;
+        }
+
+        .sunset-cruise-lock-ring,
+        .sunset-cruise-lock-ring2,
+        .sunset-cruise-crosshair,
+        .sunset-cruise-lock-label,
+        .sunset-cruise-hit {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        .sunset-cruise-lock-ring,
+        .sunset-cruise-lock-ring2 {
+            fill: none;
+            filter: drop-shadow(0 0 10px rgba(255,210,122,.62));
+        }
+
+        .sunset-cruise-lock-ring {
+            stroke: #ffd27a;
+            stroke-width: 2.6;
+        }
+
+        .sunset-cruise-lock-ring2 {
+            stroke: #56e8ff;
+            stroke-width: 2.2;
+            stroke-dasharray: 12 18;
+        }
+
+        .sunset-cruise-crosshair {
+            fill: none;
+            stroke: #fff2c7;
+            stroke-width: 3.2;
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 8px rgba(255,242,199,.56));
+        }
+
+        .sunset-cruise-lock-label {
+            color: #fff2c7;
+            font: 700 14px Arial, Helvetica, sans-serif;
+            letter-spacing: 0;
+        }
+
+        .sunset-cruise-lock-label div {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(14, 18, 35, 0.54);
+            outline: 1px solid rgba(255, 210, 122, 0.36);
+        }
+
+        .sunset-cruise-hit {
+            fill: #ffd27a;
+            filter: drop-shadow(0 0 18px rgba(255,210,122,.82));
+        }
+
+        .sunset-cruise-flash {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            background: radial-gradient(circle at 53% 52%, rgba(255, 236, 196, 0.72), transparent 15%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sunset-cruise-stream {
+            position: absolute;
+            z-index: 4;
+            left: var(--stream-x);
+            top: var(--stream-y);
+            width: 264px;
+            height: 82px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(10, 15, 30, 0.72), rgba(10, 13, 24, 0.46));
+            outline: 1px solid var(--stream-color);
+            box-shadow: 0 0 30px color-mix(in srgb, var(--stream-color) 34%, transparent);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(.9);
+        }
+
+        .sunset-cruise-stream--dml {
+            --stream-x: 16%;
+            --stream-y: 66%;
+            --stream-color: #58e6ff;
+        }
+
+        .sunset-cruise-stream--cuda {
+            --stream-x: 84%;
+            --stream-y: 66%;
+            --stream-color: #a5ff74;
+        }
+
+        .sunset-cruise-stream::after {
+            content: "";
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--stream-color), transparent 67%);
+            opacity: .62;
+        }
+
+        .sunset-cruise-stream strong,
+        .sunset-cruise-stream span {
+            position: absolute;
+            left: 24px;
+            font-family: Arial, Helvetica, sans-serif;
+            letter-spacing: 0;
+        }
+
+        .sunset-cruise-stream strong {
+            top: 16px;
+            color: var(--stream-color);
+            font-size: 23px;
+            line-height: 1;
+        }
+
+        .sunset-cruise-stream span {
+            top: 50px;
+            color: rgba(255, 246, 218, 0.76);
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .sunset-cruise-light {
+            position: absolute;
+            z-index: 3;
+            left: var(--light-left);
+            right: var(--light-right);
+            top: var(--light-top);
+            width: 150px;
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, transparent, var(--light-color));
+            box-shadow: 0 0 20px var(--light-color);
+            opacity: 0;
+            transform: rotate(var(--light-rot));
+        }
+
+        .sunset-cruise-light--dml {
+            --light-left: 23%;
+            --light-right: auto;
+            --light-top: 62%;
+            --light-color: rgba(86, 232, 255, 0.9);
+            --light-rot: -12deg;
+        }
+
+        .sunset-cruise-light--cuda {
+            --light-left: auto;
+            --light-right: 23%;
+            --light-top: 62%;
+            --light-color: rgba(165, 255, 116, 0.88);
+            --light-rot: 192deg;
+        }
+
+        .sunset-cruise-panels {
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .sunset-cruise-wire {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+        }
+
+        .sunset-cruise-wire path {
+            fill: none;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-dasharray: 1;
+            stroke-dashoffset: 1;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .sunset-cruise-module {
+            position: absolute;
+            width: var(--module-w);
+            height: 116px;
+            left: var(--module-x);
+            top: var(--module-y);
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(9, 13, 26, 0.72), rgba(12, 14, 24, 0.42));
+            outline: 1px solid color-mix(in srgb, var(--module-accent) 44%, transparent);
+            box-shadow: 0 18px 54px rgba(0,0,0,.22), 0 0 28px color-mix(in srgb, var(--module-accent) 20%, transparent);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(58px) scale(.9);
+        }
+
+        .sunset-cruise-module--aim {
+            --module-x: 12%;
+            --module-y: 24%;
+            --module-w: min(24vw, 310px);
+            --module-accent: #ffd27a;
+            --module-delay: 0s;
+        }
+
+        .sunset-cruise-module--dml {
+            --module-x: 63%;
+            --module-y: 23%;
+            --module-w: min(26vw, 350px);
+            --module-accent: #58e6ff;
+            --module-delay: .16s;
+        }
+
+        .sunset-cruise-module--cuda {
+            --module-x: 16%;
+            --module-y: 72%;
+            --module-w: min(26vw, 340px);
+            --module-accent: #a5ff74;
+            --module-delay: .28s;
+        }
+
+        .sunset-cruise-module--ui {
+            --module-x: 60%;
+            --module-y: 72%;
+            --module-w: min(28vw, 380px);
+            --module-accent: #ff8a5c;
+            --module-delay: .4s;
+        }
+
+        .sunset-cruise-module::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--module-accent), transparent);
+            opacity: .82;
+        }
+
+        .sunset-cruise-module strong,
+        .sunset-cruise-module span {
+            position: absolute;
+            left: 28px;
+            font-family: Arial, Helvetica, sans-serif;
+            letter-spacing: 0;
+        }
+
+        .sunset-cruise-module strong {
+            top: 22px;
+            color: #fff4d8;
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .sunset-cruise-module span {
+            top: 64px;
+            color: rgba(255,244,216,.66);
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .sunset-cruise-title {
+            z-index: 5;
+            display: grid;
+            place-items: end center;
+            padding-bottom: 22vh;
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+            opacity: 0;
+            transform: translateY(70px);
+            pointer-events: none;
+        }
+
+        .sunset-cruise-title strong {
+            display: block;
+            color: #fff3d0;
+            font-size: clamp(72px, 7vw, 104px);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: 0;
+            text-shadow: 0 0 18px rgba(255,210,122,.42), 0 0 52px rgba(255,132,68,.26);
+        }
+
+        .sunset-cruise-title span {
+            display: block;
+            margin-top: 20px;
+            color: rgba(255,246,223,.72);
+            font-size: clamp(20px, 2.2vw, 27px);
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .sunset-cruise-vignette {
+            z-index: 6;
+            box-shadow: inset 0 0 140px rgba(5, 4, 20, 0.9), inset 0 -120px 180px rgba(7, 5, 24, 0.75);
+            pointer-events: none;
+        }
+
+        .sunset-cruise-close {
+            position: fixed;
+            top: max(18px, env(safe-area-inset-top));
+            right: max(18px, env(safe-area-inset-right));
+            width: 42px;
+            height: 42px;
+            border: 1px solid rgba(255, 246, 223, 0.24);
+            border-radius: 50%;
+            color: #fff6df;
+            background: rgba(9, 9, 26, 0.36);
+            backdrop-filter: blur(16px);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            opacity: 0.82;
+            transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out), background 0.2s var(--ease-out);
+        }
+
+        .sunset-cruise-close:hover {
+            background: rgba(9, 9, 26, 0.58);
+            opacity: 1;
+            transform: scale(1.04);
+        }
+
+        .sunset-cruise-close svg {
+            width: 19px;
+            height: 19px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2.4;
+        }
+
+        body.sunset-cruise-lock {
+            overflow: hidden;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-route {
+            animation: sunset-route 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-lock-ring {
+            animation: sunset-lock 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-lock-ring2 {
+            animation: sunset-lock-alt 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-crosshair,
+        .sunset-cruise-overlay.is-open .sunset-cruise-lock-label {
+            animation: sunset-lock 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-hit {
+            animation: sunset-hit 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-flash {
+            animation: sunset-flash 12s ease-out infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-stream {
+            animation: sunset-stream-card 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-light {
+            animation: sunset-stream-light 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-wire {
+            animation: sunset-wire 12s ease infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-wire path {
+            animation: sunset-wire-draw 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-module {
+            animation: sunset-module 12s cubic-bezier(.16,1,.3,1) infinite;
+            animation-delay: var(--module-delay);
+        }
+
+        .sunset-cruise-overlay.is-open .sunset-cruise-title {
+            animation: sunset-title 12s cubic-bezier(.16,1,.3,1) infinite;
+        }
+
+        @keyframes sunset-cruise-push {
+            0% { transform: scale(1.06) translate3d(0, 0, 0); filter: saturate(1.1) contrast(1.03) brightness(.82); }
+            45% { transform: scale(1.11) translate3d(0, 1.6vh, 0); filter: saturate(1.2) contrast(1.08) brightness(.9); }
+            72% { transform: scale(1.095) translate3d(0, .8vh, 0); filter: saturate(1.18) contrast(1.06) brightness(.88); }
+            100% { transform: scale(1.06) translate3d(0, 0, 0); filter: saturate(1.1) contrast(1.03) brightness(.82); }
+        }
+
+        @keyframes sunset-cruise-dust {
+            0% { background-position: 30px 40px, 120px 90px; opacity: .38; }
+            50% { background-position: -90px 190px, 260px 230px; opacity: .62; }
+            100% { background-position: -210px 340px, 400px 370px; opacity: .38; }
+        }
+
+        @keyframes sunset-stream-card {
+            0%, 7% { opacity: 0; transform: translate(-50%, -50%) scale(.86) translateY(18px); }
+            13%, 34% { opacity: .92; transform: translate(-50%, -50%) scale(1) translateY(0); }
+            43%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(.96) translateY(-20px); }
+        }
+
+        @keyframes sunset-stream-light {
+            0%, 10% { opacity: 0; transform: translateX(-44px) rotate(var(--light-rot)); }
+            17%, 36% { opacity: .88; transform: translateX(0) rotate(var(--light-rot)); }
+            47%, 100% { opacity: 0; transform: translateX(74px) rotate(var(--light-rot)); }
+        }
+
+        @keyframes sunset-route {
+            0%, 17% { opacity: 0; stroke-dashoffset: 130; }
+            23% { opacity: .95; stroke-dashoffset: 70; }
+            42% { opacity: .95; stroke-dashoffset: 0; }
+            54%, 100% { opacity: 0; stroke-dashoffset: -70; }
+        }
+
+        @keyframes sunset-lock {
+            0%, 32% { opacity: 0; transform: scale(.72) rotate(-18deg); }
+            39%, 56% { opacity: .96; transform: scale(1) rotate(0deg); }
+            63%, 100% { opacity: 0; transform: scale(1.18) rotate(10deg); }
+        }
+
+        @keyframes sunset-lock-alt {
+            0%, 33% { opacity: 0; transform: scale(.86) rotate(28deg); }
+            40%, 57% { opacity: .86; transform: scale(1.06) rotate(-18deg); }
+            64%, 100% { opacity: 0; transform: scale(1.28) rotate(-46deg); }
+        }
+
+        @keyframes sunset-hit {
+            0%, 44% { opacity: 0; transform: scale(.4); }
+            48% { opacity: 1; transform: scale(1); }
+            55%, 100% { opacity: 0; transform: scale(1.9); }
+        }
+
+        @keyframes sunset-flash {
+            0%, 45% { opacity: 0; }
+            48% { opacity: .66; }
+            54%, 100% { opacity: 0; }
+        }
+
+        @keyframes sunset-wire {
+            0%, 49% { opacity: 0; }
+            55%, 73% { opacity: .82; }
+            80%, 100% { opacity: 0; }
+        }
+
+        @keyframes sunset-wire-draw {
+            0%, 50% { stroke-dashoffset: 1; }
+            64%, 74% { stroke-dashoffset: 0; }
+            86%, 100% { stroke-dashoffset: -1; }
+        }
+
+        @keyframes sunset-module {
+            0%, 50% { opacity: 0; transform: translateY(58px) scale(.9); }
+            58%, 72% { opacity: .95; transform: translateY(0) scale(1); }
+            82%, 100% { opacity: 0; transform: translateY(-34px) scale(.98); }
+        }
+
+        @keyframes sunset-title {
+            0%, 76% { opacity: 0; transform: translateY(58px); filter: blur(8px); }
+            84%, 94% { opacity: 1; transform: translateY(0); filter: blur(0); }
+            100% { opacity: 0; transform: translateY(-22px); filter: blur(4px); }
+        }
+
+        @media (max-width: 720px) {
+            .sunset-cruise-bg {
+                background-position: 52% 50%;
+            }
+
+            .sunset-cruise-stream {
+                width: 196px;
+                height: 72px;
+                border-radius: 16px;
+            }
+
+            .sunset-cruise-stream--dml {
+                --stream-x: 30%;
+                --stream-y: 70%;
+            }
+
+            .sunset-cruise-stream--cuda {
+                --stream-x: 70%;
+                --stream-y: 70%;
+            }
+
+            .sunset-cruise-stream strong {
+                left: 18px;
+                top: 14px;
+                font-size: 18px;
+            }
+
+            .sunset-cruise-stream span {
+                left: 18px;
+                top: 44px;
+                font-size: 11px;
+            }
+
+            .sunset-cruise-module {
+                width: min(76vw, 320px);
+                height: 94px;
+                left: 12%;
+                border-radius: 16px;
+            }
+
+            .sunset-cruise-module--aim { --module-y: 14%; }
+            .sunset-cruise-module--dml { --module-y: 28%; }
+            .sunset-cruise-module--cuda { --module-y: 42%; }
+            .sunset-cruise-module--ui { --module-y: 56%; }
+
+            .sunset-cruise-module strong {
+                left: 22px;
+                top: 18px;
+                font-size: 21px;
+            }
+
+            .sunset-cruise-module span {
+                left: 22px;
+                top: 53px;
+                font-size: 11px;
+            }
+
+            .sunset-cruise-title {
+                padding-bottom: 14vh;
+            }
+
+            .sunset-cruise-title strong {
+                font-size: clamp(46px, 16vw, 72px);
+            }
+
+            .sunset-cruise-title span {
+                margin-top: 14px;
+                font-size: clamp(15px, 4.8vw, 20px);
+            }
         }
 
         .sandbox-intro {
@@ -2283,6 +3145,28 @@
             <div class="hero-alert">
                 调参很简单 — 理解本文,你也能调出赋能、航天顶护的拉枪手感
             </div>
+
+            <section class="download-card" aria-labelledby="downloadDmlTitle">
+                <div>
+                    <p class="download-card__eyebrow">Release package</p>
+                    <h2 class="download-card__title" id="downloadDmlTitle">Sunset DML 3.1.0 完整运行包</h2>
+                    <div class="download-card__meta" aria-label="下载包信息">
+                        <span class="download-card__chip">DirectML 通用版</span>
+                        <span class="download-card__chip">约 68.2 MB</span>
+                        <span class="download-card__chip">解压即用</span>
+                    </div>
+                </div>
+                <div class="download-card__actions">
+                    <button class="download-card__btn" id="downloadDmlBtn" type="button">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                        下载 DML 完整包
+                    </button>
+                    <div class="download-card__progress" aria-hidden="true">
+                        <span class="download-card__bar" id="downloadDmlBar"></span>
+                    </div>
+                    <p class="download-card__status" id="downloadDmlStatus">浏览器会自动合并下载包</p>
+                </div>
+            </section>
 
             <h2 class="section-title">
                 <span class="section-number">01</span>
@@ -3632,6 +4516,13 @@
                 </div>
             </div>
 
+            <div class="sunset-cruise-launch">
+                <button class="sunset-cruise-btn" id="sunsetCruiseBtn" type="button" aria-haspopup="dialog" aria-controls="sunsetCruiseOverlay">
+                    <span class="sunset-cruise-icon" aria-hidden="true">✦</span>
+                    <span class="sunset-cruise-label">余晖巡航</span>
+                </button>
+            </div>
+
             <hr style="margin: 40px 0; border: 0; border-top: 1px dashed var(--color-divider);">
 
             <!-- 追加额外的高级 3D 游乐场 iframe -->
@@ -3972,6 +4863,93 @@
                         if (savedBtn) savedBtn.click();
                     }
                 } catch (_) {}
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('downloadDmlBtn');
+            const bar = document.getElementById('downloadDmlBar');
+            const status = document.getElementById('downloadDmlStatus');
+            const basePath = 'assets/downloads/sunset-dml-3.1.0/';
+
+            if (!btn || !bar || !status) return;
+
+            function setProgress(percent, text) {
+                bar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+                status.textContent = text;
+            }
+
+            async function downloadPart(url, loadedBytes, totalBytes) {
+                const response = await fetch(url, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`下载失败: ${response.status}`);
+                }
+
+                const reader = response.body?.getReader();
+                if (!reader) {
+                    const buffer = await response.arrayBuffer();
+                    setProgress((loadedBytes + buffer.byteLength) / totalBytes * 100, '正在合并下载包...');
+                    return buffer;
+                }
+
+                const chunks = [];
+                let received = 0;
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    received += value.byteLength;
+                    setProgress((loadedBytes + received) / totalBytes * 100, '正在下载分片...');
+                }
+
+                const bytes = new Uint8Array(received);
+                let offset = 0;
+                chunks.forEach((chunk) => {
+                    bytes.set(chunk, offset);
+                    offset += chunk.byteLength;
+                });
+                return bytes.buffer;
+            }
+
+            btn.addEventListener('click', async () => {
+                btn.disabled = true;
+                setProgress(0, '正在准备下载...');
+
+                try {
+                    const manifestResponse = await fetch(`${basePath}manifest.json`, { cache: 'no-store' });
+                    if (!manifestResponse.ok) {
+                        throw new Error(`清单读取失败: ${manifestResponse.status}`);
+                    }
+                    const manifest = await manifestResponse.json();
+                    const buffers = [];
+                    let loadedBytes = 0;
+
+                    for (const part of manifest.parts) {
+                        const buffer = await downloadPart(`${basePath}${part.name}`, loadedBytes, manifest.size);
+                        if (buffer.byteLength !== part.size) {
+                            throw new Error(`分片大小不匹配: ${part.name}`);
+                        }
+                        buffers.push(buffer);
+                        loadedBytes += buffer.byteLength;
+                    }
+
+                    setProgress(100, '正在生成 zip...');
+                    const blob = new Blob(buffers, { type: 'application/zip' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = manifest.fileName || 'Sunset-dml-3.1.0.zip';
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 5000);
+                    setProgress(100, '下载已开始');
+                } catch (error) {
+                    setProgress(0, '下载失败,请刷新页面后重试');
+                    console.error(error);
+                } finally {
+                    btn.disabled = false;
+                }
             });
         });
 
@@ -5329,6 +6307,53 @@
         }());
 
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const launchBtn = document.getElementById('sunsetCruiseBtn');
+            const overlay = document.getElementById('sunsetCruiseOverlay');
+            const closeBtn = document.getElementById('sunsetCruiseClose');
+            const stage = document.getElementById('sunsetCruiseStage');
+            const audio = document.getElementById('sunsetCruiseAudio');
+
+            if (!launchBtn || !overlay || !closeBtn || !stage || !audio) return;
+
+            function openCruise() {
+                overlay.classList.remove('is-open');
+                void stage.offsetWidth;
+                overlay.classList.add('is-open');
+                document.body.classList.add('sunset-cruise-lock');
+                audio.currentTime = 0;
+                audio.volume = 0.72;
+                const playPromise = audio.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(() => {
+                        closeBtn.setAttribute('data-audio-state', 'blocked');
+                    });
+                }
+                closeBtn.focus({ preventScroll: true });
+            }
+
+            function closeCruise() {
+                overlay.classList.remove('is-open');
+                document.body.classList.remove('sunset-cruise-lock');
+                audio.pause();
+                audio.currentTime = 0;
+                closeBtn.removeAttribute('data-audio-state');
+                launchBtn.focus({ preventScroll: true });
+            }
+
+            launchBtn.addEventListener('click', openCruise);
+            closeBtn.addEventListener('click', closeCruise);
+            overlay.addEventListener('click', (event) => {
+                if (event.target === overlay) closeCruise();
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && overlay.classList.contains('is-open')) {
+                    closeCruise();
+                }
+            });
+        });
+    </script>
 
     <!-- ======================== -->
     <!-- 返回顶部 -->
@@ -5336,6 +6361,82 @@
     <button class="back-to-top" id="backToTop" aria-label="返回顶部">
         <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
     </button>
+
+    <div class="sunset-cruise-overlay" id="sunsetCruiseOverlay" role="dialog" aria-modal="true" aria-label="余晖巡航">
+        <div class="sunset-cruise-stage" id="sunsetCruiseStage" aria-hidden="true">
+            <div class="sunset-cruise-bg"></div>
+            <div class="sunset-cruise-grade"></div>
+            <div class="sunset-cruise-particles"></div>
+            <div class="sunset-cruise-hud">
+                <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="sunsetCruiseAimPath" x1="520" y1="820" x2="1010" y2="560" gradientUnits="userSpaceOnUse">
+                            <stop offset="0" stop-color="#58e6ff"/>
+                            <stop offset=".56" stop-color="#ffd27a"/>
+                            <stop offset="1" stop-color="#ff8a5c"/>
+                        </linearGradient>
+                    </defs>
+                    <path class="sunset-cruise-route" d="M 520 820 C 690 675, 820 642, 1010 560"/>
+                    <circle class="sunset-cruise-lock-ring" cx="1010" cy="560" r="82"/>
+                    <circle class="sunset-cruise-lock-ring2" cx="1010" cy="560" r="116"/>
+                    <path class="sunset-cruise-crosshair" d="M 1010 424 L 1010 500 M 1010 620 L 1010 696 M 874 560 L 950 560 M 1070 560 L 1146 560"/>
+                    <g class="sunset-cruise-hit">
+                        <circle cx="1010" cy="560" r="8"/>
+                        <path d="M 986 536 L 1034 584 M 1034 536 L 986 584"/>
+                    </g>
+                    <foreignObject class="sunset-cruise-lock-label" x="1032" y="468" width="190" height="44">
+                        <div xmlns="http://www.w3.org/1999/xhtml">PRECISION LOCK</div>
+                    </foreignObject>
+                </svg>
+            </div>
+            <div class="sunset-cruise-stream sunset-cruise-stream--dml">
+                <strong>DML</strong>
+                <span>Universal flow</span>
+            </div>
+            <div class="sunset-cruise-stream sunset-cruise-stream--cuda">
+                <strong>CUDA</strong>
+                <span>TensorRT surge</span>
+            </div>
+            <div class="sunset-cruise-light sunset-cruise-light--dml"></div>
+            <div class="sunset-cruise-light sunset-cruise-light--cuda"></div>
+            <div class="sunset-cruise-panels">
+                <svg class="sunset-cruise-wire" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <path d="M 390 306 C 600 332, 748 418, 946 560" stroke="#ffd27a" pathLength="1"/>
+                    <path d="M 1325 306 C 1200 374, 1116 454, 1010 560" stroke="#58e6ff" pathLength="1"/>
+                    <path d="M 438 834 C 620 764, 798 662, 1010 560" stroke="#a5ff74" pathLength="1"/>
+                    <path d="M 1270 826 C 1142 752, 1082 642, 1010 560" stroke="#ff8a5c" pathLength="1"/>
+                </svg>
+                <div class="sunset-cruise-module sunset-cruise-module--aim">
+                    <strong>AIM CORE</strong>
+                    <span>prediction / smoothing / lock</span>
+                </div>
+                <div class="sunset-cruise-module sunset-cruise-module--dml">
+                    <strong>DML ENGINE</strong>
+                    <span>wide device compatibility</span>
+                </div>
+                <div class="sunset-cruise-module sunset-cruise-module--cuda">
+                    <strong>CUDA + TRT</strong>
+                    <span>high performance inference</span>
+                </div>
+                <div class="sunset-cruise-module sunset-cruise-module--ui">
+                    <strong>SUNSET UI</strong>
+                    <span>clean panel / quick tuning</span>
+                </div>
+            </div>
+            <div class="sunset-cruise-title">
+                <div>
+                    <strong>Sunset</strong>
+                    <span>free aim assistance, cruising in the afterglow</span>
+                </div>
+            </div>
+            <div class="sunset-cruise-flash"></div>
+            <div class="sunset-cruise-vignette"></div>
+        </div>
+        <audio id="sunsetCruiseAudio" src="assets/sunset-cruise-sfx.wav" preload="auto" loop></audio>
+        <button class="sunset-cruise-close" id="sunsetCruiseClose" type="button" aria-label="关闭余晖巡航">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
 
     <!-- ======================== -->
     <!-- QQ 群悬浮按钮 (可折叠) -->
